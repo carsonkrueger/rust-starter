@@ -1,0 +1,3 @@
+
+dev:
+	 bacon ./app run
