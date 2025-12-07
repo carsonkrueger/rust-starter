@@ -1,3 +1,3 @@
 
-dev:
+dev live:
 	 bacon ./app run
