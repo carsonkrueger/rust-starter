@@ -1,20 +1,20 @@
-use crate::services::New;
+use async_trait::async_trait;
 
+#[async_trait]
 pub trait HelloWorldService {
+    fn new() -> Self;
     async fn hello_world(&self) -> String;
 }
 
 #[derive(Clone, Debug)]
 pub struct HelloWorld {}
 
-impl New for HelloWorld {
+#[async_trait]
+impl HelloWorldService for HelloWorld {
     fn new() -> Self {
         Self {}
     }
-}
-
-impl HelloWorldService for HelloWorld {
     async fn hello_world(&self) -> String {
-        "Hello, World!".to_string()
+        "Hello World!".into()
     }
 }

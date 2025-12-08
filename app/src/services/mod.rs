@@ -1,23 +1,31 @@
-use crate::services::hello_world::HelloWorldService;
+use std::sync::Arc;
+
+use crate::{
+    repositories::DBPool,
+    services::{hello_world::HelloWorldService, hello_world_two::HelloWorldTwoService},
+};
 
 pub mod hello_world;
+pub mod hello_world_two;
 
-pub trait New {
-    fn new() -> Self;
-}
-
+#[allow(unused)]
 #[derive(Clone, Debug)]
-pub struct ServiceManager<HWS: HelloWorldService> {
-    pub hello_world: HWS,
+pub struct ServiceManager<HW: HelloWorldService, HW2: HelloWorldTwoService<HW>> {
+    pub hello_world: Arc<HW>,
+    pub hello_world_two: Arc<HW2>,
 }
 
-impl<HW> Default for ServiceManager<HW>
+impl<HW, HW2> ServiceManager<HW, HW2>
 where
-    HW: New + HelloWorldService,
+    HW: HelloWorldService,
+    HW2: HelloWorldTwoService<HW>,
 {
-    fn default() -> Self {
+    pub fn default(pool: DBPool) -> Self {
+        let hw = Arc::new(HW::new());
+        let hw2 = Arc::new(HW2::new(pool, hw.clone()));
         Self {
-            hello_world: HW::new(),
+            hello_world: hw,
+            hello_world_two: hw2,
         }
     }
 }

@@ -1,0 +1,32 @@
+services:
+    rust_starter_db:
+        container_name: rust_starter_db
+        image: postgres:18
+        environment:
+            POSTGRES_USER: ${DB_USER}
+            POSTGRES_PASSWORD: ${DB_PASSWORD}
+            POSTGRES_DB: ${DB_NAME}
+        ports:
+            - "${DB_PORT}:5432"
+        volumes:
+            - pgdata_rust_starter:/var/lib/postgresql/18/docker
+        healthcheck:
+            test: ["CMD", "pg_isready", "-U", "${DB_USER}", "-d", "${DB_NAME}"]
+            interval: 2s
+            retries: 3
+
+    rust_starter_backend:
+        container_name: rust_starter_backend
+        depends_on:
+            rust_starter_db:
+                condition: service_healthy
+        build:
+            dockerfile: ./Dockerfile
+            context: .
+        ports:
+            - "${PORT}:${PORT}"
+        env_file:
+            - .env
+
+volumes:
+    pgdata_rust_starter:

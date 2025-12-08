@@ -5,7 +5,7 @@ use axum::{Router, extract::State, response::IntoResponse, routing::get};
 use crate::{
     app_router::{NestedRouter, NestedRouterPath},
     context::AppContext,
-    services::hello_world::HelloWorldService,
+    services::hello_world_two::HelloWorldTwoService,
 };
 
 #[derive(Clone)]
@@ -21,7 +21,6 @@ impl NestedRouter<Arc<AppContext>> for HelloWorldRoute {
     }
 }
 
-#[axum::debug_handler]
 async fn hello_world(State(ctx): State<Arc<AppContext>>) -> impl IntoResponse {
-    ctx.svc.hello_world.hello_world().await
+    ctx.svc.hello_world_two.hello_world_two().await
 }
