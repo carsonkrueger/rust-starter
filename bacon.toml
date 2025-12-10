@@ -6,6 +6,7 @@
 #
 # You may check the current default at
 #   https://github.com/Canop/bacon/blob/main/defaults/default-bacon.toml
+watch = ["app/src"]
 
 default_job = "check"
 env.CARGO_TERM_COLOR = "always"

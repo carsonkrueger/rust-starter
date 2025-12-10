@@ -30,3 +30,5 @@ Thumbs.db
 # Logs and other temporary files
 *.log
 tmp/
+
+.env
