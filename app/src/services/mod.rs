@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use crate::{
-    repositories::{DBPool, RepositoryManager},
+    repositories::{self, DBPool, RepositoryManager},
     services::{hello_world::HelloWorldService, hello_world_two::HelloWorldTwoService},
 };
 
@@ -29,4 +29,14 @@ where
             hello_world_two: hw2,
         }
     }
+}
+
+pub type Result<T> = std::result::Result<T, Error>;
+
+#[derive(thiserror::Error, Debug)]
+pub enum Error {
+    #[error("repository error: {0}")]
+    Repository(#[from] repositories::Error),
+    #[error("r2d2 error: {0}")]
+    R2d2(#[from] r2d2::Error),
 }

@@ -22,5 +22,8 @@ impl NestedRouter<Arc<AppContext>> for HelloWorldRoute {
 }
 
 async fn hello_world(State(ctx): State<Arc<AppContext>>) -> impl IntoResponse {
-    ctx.svc.hello_world_two.hello_world_two().await
+    match ctx.svc.hello_world_two.hello_world_two().await {
+        Ok(message) => message,
+        Err(err) => format!("Error: {}", err),
+    }
 }
