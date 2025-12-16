@@ -1,7 +1,11 @@
-use std::sync::Arc;
-
-use crate::{context::AppContext, routes::public::hello_world::HelloWorldRoute};
-use axum::Router;
+use crate::{
+    context::AppState, middlewares::auth::auth_middleware,
+    routes::public::hello_world::HelloWorldRoute,
+};
+use axum::{
+    Router,
+    middleware::{self},
+};
 
 pub trait NestedRouter<S>
 where
@@ -14,8 +18,11 @@ pub trait NestedRouterPath {
     const PATH: &str;
 }
 
-pub fn build_router(ctx: AppContext) -> Router {
+pub fn build_router(ctx: AppState) -> Router {
     Router::new()
         .nest(HelloWorldRoute::PATH, HelloWorldRoute::router())
-        .with_state(Arc::new(ctx))
+        // ^^^ Private Routes Above ^^^
+        .layer(middleware::from_fn_with_state(ctx.clone(), auth_middleware))
+        // ^^^ Public Routes Above ^^^
+        .with_state(ctx)
 }

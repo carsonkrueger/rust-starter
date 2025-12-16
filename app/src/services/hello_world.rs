@@ -6,7 +6,7 @@ pub trait HelloWorldService {
     async fn hello_world(&self) -> String;
 }
 
-#[derive(Clone, Debug)]
+#[derive(Debug, Clone)]
 pub struct HelloWorld {}
 
 #[async_trait]

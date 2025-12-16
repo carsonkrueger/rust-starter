@@ -2,41 +2,46 @@ use std::sync::Arc;
 
 use crate::{
     repositories::{self, DBPool, RepositoryManager},
-    services::{hello_world::HelloWorldService, hello_world_two::HelloWorldTwoService},
+    services::{auth::AuthService, hello_world::HelloWorldService},
 };
 
+pub mod auth;
 pub mod hello_world;
-pub mod hello_world_two;
 
 #[allow(unused)]
 #[derive(Clone, Debug)]
-pub struct ServiceManager<HW: HelloWorldService, HW2: HelloWorldTwoService<HW>> {
+pub struct ServiceManager<HW: HelloWorldService, AT: AuthService> {
     pub hello_world: Arc<HW>,
-    pub hello_world_two: Arc<HW2>,
+    pub auth: Arc<AT>,
 }
 
-impl<HW, HW2> ServiceManager<HW, HW2>
+impl<HW, AT> ServiceManager<HW, AT>
 where
     HW: HelloWorldService,
-    HW2: HelloWorldTwoService<HW>,
+    AT: AuthService,
 {
     pub fn default(pool: DBPool, repos: RepositoryManager) -> Self {
         let repos = Arc::new(repos);
-        let hw = Arc::new(HW::new());
-        let hw2 = Arc::new(HW2::new(pool, repos, hw.clone()));
-        Self {
-            hello_world: hw,
-            hello_world_two: hw2,
-        }
+        let hello_world = Arc::new(HW::new());
+        let auth = Arc::new(AT::new(pool, repos));
+        Self { hello_world, auth }
     }
 }
 
-pub type Result<T> = std::result::Result<T, Error>;
+#[allow(unused)]
+pub type ServiceResult<T> = std::result::Result<T, Error>;
 
+#[allow(unused)]
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
     #[error("repository error: {0}")]
     Repository(#[from] repositories::Error),
-    #[error("r2d2 error: {0}")]
-    R2d2(#[from] r2d2::Error),
+    #[error("bb8 error: {0}")]
+    Bb8(String),
+}
+
+impl<E: std::error::Error + 'static> From<bb8::RunError<E>> for Error {
+    fn from(err: bb8::RunError<E>) -> Self {
+        Error::Bb8(err.to_string())
+    }
 }

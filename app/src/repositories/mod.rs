@@ -1,33 +1,50 @@
-use diesel::{PgConnection, r2d2::ConnectionManager};
-use r2d2::{Pool, PooledConnection};
+use bb8::Pool;
+use diesel_async::{AsyncPgConnection, pooled_connection::AsyncDieselConnectionManager};
 
-use crate::repositories::users::{Users, UsersRepository};
+use crate::repositories::{
+    sessions::{Sessions, SessionsRepository},
+    users::{Users, UsersRepository},
+};
 
+pub mod sessions;
 pub mod users;
 
-pub type DBPool = Pool<ConnectionManager<PgConnection>>;
-pub type DBConnection = PooledConnection<ConnectionManager<PgConnection>>;
+pub type DbConn = AsyncPgConnection;
+pub type DBPool = Pool<AsyncDieselConnectionManager<DbConn>>;
 
-#[derive(Debug)]
-pub struct RepositoryManager<UR = Users>
-where
-    UR: UsersRepository,
-{
-    pub users: UR,
+pub trait Repository<R, PK> {
+    fn new() -> Self;
+    async fn insert(&self, db: &mut DbConn, row: &mut R) -> RepositoryResult<()>;
+    async fn get_one(&self, db: &mut DbConn, pk: PK) -> RepositoryResult<R>;
 }
 
-impl<UR> RepositoryManager<UR>
+#[allow(unused)]
+#[derive(Debug)]
+pub struct RepositoryManager<UR = Users, SR = Sessions>
 where
     UR: UsersRepository,
+    SR: SessionsRepository,
+{
+    pub users: UR,
+    pub sessions: SR,
+}
+
+impl<UR, SR> RepositoryManager<UR, SR>
+where
+    UR: UsersRepository,
+    SR: SessionsRepository,
 {
     pub fn default() -> Self {
         let users = UR::new();
-        Self { users }
+        let sessions = SR::new();
+        Self { users, sessions }
     }
 }
 
-pub type Result<T> = std::result::Result<T, Error>;
+#[allow(unused)]
+pub type RepositoryResult<T> = std::result::Result<T, Error>;
 
+#[allow(unused)]
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
     #[error("Diesel error: {0}")]

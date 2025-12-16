@@ -1,13 +1,13 @@
 use std::{path::Path, time::Duration};
 
-use diesel::r2d2::{ConnectionManager, Pool};
-
+use bb8::Pool;
+use diesel_async::pooled_connection::AsyncDieselConnectionManager;
 use tokio::net::TcpListener;
 
 use crate::{
-    context::AppContext,
+    context::AppState,
     env::{config::Config, db_config::DBConfig},
-    repositories::RepositoryManager,
+    repositories::{DbConn, RepositoryManager},
     services::ServiceManager,
 };
 
@@ -33,11 +33,12 @@ async fn main() {
     let cfg = Config::parse(env_path);
     let db_cfg = DBConfig::parse();
 
-    let pool = connection_pool(&db_cfg);
+    // let pool = connection_pool(&db_cfg);
+    let pool = connection_pool(&db_cfg).await;
 
     let repos = RepositoryManager::default();
     let svc = ServiceManager::default(pool, repos);
-    let ctx = AppContext { cfg, svc };
+    let ctx = AppState { cfg, svc };
     let router = app_router::build_router(ctx.clone());
 
     let addr = format!("0.0.0.0:{}", ctx.cfg.port);
@@ -52,12 +53,13 @@ async fn main() {
         .expect("could not serve application")
 }
 
-fn connection_pool(db_cfg: &DBConfig) -> repositories::DBPool {
-    let manager = ConnectionManager::new(db_cfg.url());
+async fn connection_pool(db_cfg: &DBConfig) -> repositories::DBPool {
+    let manager = AsyncDieselConnectionManager::<DbConn>::new(db_cfg.url());
     Pool::builder()
         .test_on_check_out(true)
         .max_size(db_cfg.max_conns)
         .connection_timeout(Duration::from_secs(5))
         .build(manager)
+        .await
         .expect("Could not build connection pool")
 }
