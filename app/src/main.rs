@@ -12,13 +12,12 @@ use crate::{
 };
 
 mod app_router;
+mod app_templates;
 mod context;
 mod env;
 mod middlewares;
-pub mod models;
 mod repositories;
 mod routes;
-pub mod schema;
 mod services;
 
 #[tokio::main]

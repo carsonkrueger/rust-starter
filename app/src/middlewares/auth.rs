@@ -6,7 +6,7 @@ use axum::{
 };
 use axum_extra::extract::CookieJar;
 
-use auth::AuthParts;
+use utils::{auth::AuthParts, ctx::Ctx};
 
 use crate::{
     context::AppState,
@@ -23,8 +23,9 @@ pub async fn auth_middleware(
     mut req: Request<Body>,
     next: Next,
 ) -> RouteResult<impl IntoResponse> {
-    let auth_parts: AuthParts = jar.try_into()?;
-    let user = auth.get_user_by_auth(&auth_parts).await?;
-    req.extensions_mut().insert(user);
+    let parts: AuthParts = jar.try_into()?;
+    let user = auth.get_user_by_auth(&parts).await?;
+    let ctx = Ctx { auth: parts, user };
+    req.extensions_mut().insert(ctx);
     Ok(next.run(req).await)
 }

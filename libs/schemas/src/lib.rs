@@ -1,4 +1,3 @@
-
 //--- public ---
 // @generated automatically by Diesel CLI.
 

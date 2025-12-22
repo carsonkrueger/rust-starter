@@ -1,10 +1,13 @@
 include DEVOPS/dev/.env
 
 DIESEL_CMD := ~/.cargo/bin/diesel
-SCHEMA_FILE := app/src/schema.rs
+SCHEMA_FILE := libs/schemas/lib.rs
 
 dev live: docker-postgres
-	bacon ./app run -- ../DEVOPS/dev/.env
+	bacon ./app run
+
+tw:
+	npx @tailwindcss/cli -i libs/templates/styles.css -o app/public/css/index.css
 
 migrate:
 	${DIESEL_CMD} migration run --config-file=diesel.toml --database-url ${DATABASE_URL}

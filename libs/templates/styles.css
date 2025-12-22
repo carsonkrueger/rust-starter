@@ -1,4 +1,4 @@
-@import "tailwindcss" source("./{pkg,internal,public}/**/*.{templ,html,go,js}");
+@import "tailwindcss" source("./src/**/*.{rs,html}");
 
 @custom-variant dark (&:where(.dark, .dark *));
 

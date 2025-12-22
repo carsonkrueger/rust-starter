@@ -6,6 +6,7 @@ use axum::{
     Router,
     middleware::{self},
 };
+use tower_http::services::ServeDir;
 
 pub trait NestedRouter<S>
 where
@@ -20,9 +21,12 @@ pub trait NestedRouterPath {
 
 pub fn build_router(ctx: AppState) -> Router {
     Router::new()
-        .nest(HelloWorldRoute::PATH, HelloWorldRoute::router())
+        // === Private Routes Below ===
         // ^^^ Private Routes Above ^^^
         .layer(middleware::from_fn_with_state(ctx.clone(), auth_middleware))
+        // === Public Routes Below ===
+        .nest(HelloWorldRoute::PATH, HelloWorldRoute::router())
+        .nest_service("/public", ServeDir::new("public"))
         // ^^^ Public Routes Above ^^^
         .with_state(ctx)
 }

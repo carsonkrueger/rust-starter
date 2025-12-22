@@ -6,13 +6,9 @@
 #
 # You may check the current default at
 #   https://github.com/Canop/bacon/blob/main/defaults/default-bacon.toml
-watch = ["app/src"]
 
 default_job = "check"
 env.CARGO_TERM_COLOR = "always"
-
-[jobs.run]
-command = ["cargo", "run"]
 
 [jobs.check]
 command = ["cargo", "check"]
@@ -84,12 +80,13 @@ on_success = "back" # so that we don't open the browser at each change
 # if it makes sense for this crate.
 [jobs.run]
 command = [
-    "cargo", "run",
+    "cargo", "run", "--", "../DEVOPS/dev/.env"
     # put launch parameters for your program behind a `--` separator
 ]
 need_stdout = true
 allow_warnings = true
 background = true
+watch = ["src", "../libs"]
 
 # Run your long-running application (eg server) and have the result displayed in bacon.
 # For programs that never stop (eg a server), `background` is set to false

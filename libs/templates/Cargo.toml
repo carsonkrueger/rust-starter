@@ -1,0 +1,8 @@
+[package]
+name = "templates"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+templr = { version = "0.2.5", features = ["axum"] }
+tw_merge = "0.1.7"

@@ -2,6 +2,7 @@ use axum::{Router, extract::State, response::IntoResponse, routing::get};
 
 use crate::{
     app_router::{NestedRouter, NestedRouterPath},
+    app_templates::pages,
     context::AppState,
     services::{ServiceManager, hello_world::HelloWorldService},
 };
@@ -25,5 +26,7 @@ async fn hello_world(
         ..
     }): State<AppState>,
 ) -> impl IntoResponse {
-    hello_world.hello_world().await
+    let _ = hello_world.hello_world().await;
+    let _ = "haha3";
+    pages::home::page().into_response()
 }

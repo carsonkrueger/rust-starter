@@ -1,7 +1,6 @@
-use axum::{
-    body::Body,
-    response::{IntoResponse, Response},
-};
+use axum::{http::StatusCode, response::IntoResponse};
+
+use utils::auth;
 
 use crate::services;
 
@@ -21,6 +20,9 @@ pub enum Error {
 
 impl IntoResponse for Error {
     fn into_response(self) -> axum::response::Response {
-        Response::new(Body::new(format!("{}", self)))
+        match self {
+            Error::Service(e) => e.into_response(),
+            _ => StatusCode::INTERNAL_SERVER_ERROR.into_response(),
+        }
     }
 }

@@ -1,12 +1,15 @@
 use crate::repositories::{DbConn, Repository};
-use crate::{models::auth::user::User, schema::auth::users};
 use diesel::SelectableHelper;
 use diesel::prelude::*;
 use diesel_async::RunQueryDsl;
+use models::db::auth::user::User;
+use schemas::auth::users;
 
 use crate::repositories::RepositoryResult;
 
-pub trait UsersRepository: Repository<User, i64> {}
+pub trait UsersRepository: Repository<User, i64> {
+    async fn get_by_email(&self, db: &mut DbConn, email: &str) -> RepositoryResult<User>;
+}
 
 #[derive(Debug)]
 pub struct Users;
@@ -28,4 +31,11 @@ impl Repository<User, i64> for Users {
     }
 }
 
-impl UsersRepository for Users {}
+impl UsersRepository for Users {
+    async fn get_by_email(&self, db: &mut DbConn, email: &str) -> RepositoryResult<User> {
+        Ok(users::table
+            .filter(users::email.eq(email))
+            .first(db)
+            .await?)
+    }
+}
