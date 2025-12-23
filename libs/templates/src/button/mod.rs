@@ -1,22 +1,24 @@
 use templr::{templ, templ_ret};
 use tw_merge::{AsTailwindClass, tw_merge};
 
-pub struct ButtonProps {
+pub struct ButtonProps<'a> {
     pub id: String,
     pub class: String,
     pub variant: Variant,
+    pub attrs: &'a [(&'a str, &'a str)],
 }
 
 pub enum Variant {
     Primary,
 }
 
-impl Default for ButtonProps {
+impl Default for ButtonProps<'_> {
     fn default() -> Self {
         ButtonProps {
             id: String::default(),
             class: String::default(),
             variant: Variant::default(),
+            attrs: &[],
         }
     }
 }
@@ -35,16 +37,12 @@ impl AsTailwindClass for Variant {
     }
 }
 
-pub fn button<'a>(props: Option<ButtonProps>) -> templ_ret!['a] {
-    let props = match props {
-        Some(p) => p,
-        None => ButtonProps::default(),
-    };
-
+pub fn button<'a>(props: ButtonProps<'a>) -> templ_ret!['a] {
     templ! {
         #use children;
         <button
             class={tw_merge!("flex px-3 py-2 rounded-sm hover:shadow-md", &props.variant, &props.class)}
+            {..props.attrs}
         >
             #children;
         </button>
