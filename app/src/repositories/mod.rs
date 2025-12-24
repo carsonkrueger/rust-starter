@@ -12,12 +12,6 @@ pub mod users;
 pub type DbConn = AsyncPgConnection;
 pub type DBPool = Pool<AsyncDieselConnectionManager<DbConn>>;
 
-pub trait Repository<R, PK> {
-    fn new() -> Self;
-    async fn insert(&self, db: &mut DbConn, row: &mut R) -> RepositoryResult<()>;
-    async fn get_one(&self, db: &mut DbConn, pk: PK) -> RepositoryResult<R>;
-}
-
 #[allow(unused)]
 #[derive(Debug)]
 pub struct RepositoryManager<UR = Users, SR = Sessions>

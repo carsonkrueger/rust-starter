@@ -1,27 +1,24 @@
 use templr::{templ, templ_ret};
 
 use crate::app_templates::pages::page_layout;
-use templates::button;
+use templates::button::{self, ButtonProps};
 
 pub fn page<'a>() -> templ_ret!['a] {
-    let show_it = true;
     templ! {
         #page_layout() {
-            <div data-signals:show-it={ show_it }/>
-            Home!
-            <div data-on:click="alert('omega')">click me</div>
-            #button::button(button::ButtonProps {
-                attrs: &[("data-on:click", "$showIt = false"), ("data-show", "$showIt")],
-                ..Default::default()
-            }) {
-                Hello World!
-            }
-            #button::button(button::ButtonProps {
-                attrs: &[("data-on:click", "$showIt = true"), ("data-show", "!$showIt")],
-                ..Default::default()
-            }) {
-                Hello World 2!
-            }
+            <div class="px-8 min-h-screen text-main">
+                <div class="flex flex-col justify-center gap-8 pt-[18%]">
+                    <p class="text-6xl">The ultimate kit <br/> for <b class="font-black">your next <br/> passion project.</b></p>
+                    <a
+                        href="https://github.com/carsonkrueger/rust-starter"
+                        target="_blank"
+                    >
+                        #button::button(ButtonProps::default()) {
+                            Follow the Project
+                        }
+                    </a>
+                </div>
+            </div>
         }
     }
 }

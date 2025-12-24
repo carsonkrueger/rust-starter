@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use crate::{
     repositories::{
-        DBPool, Repository, RepositoryManager, sessions::SessionsRepository, users::UsersRepository,
+        DBPool, RepositoryManager, sessions::SessionsRepository, users::UsersRepository,
     },
     services::{Error, ServiceResult},
 };

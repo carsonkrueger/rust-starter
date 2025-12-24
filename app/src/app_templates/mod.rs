@@ -1,16 +1,17 @@
-pub mod pages;
-
 use axum::body::Body;
 use axum::http::{HeaderMap, Response};
 use axum::response::IntoResponse;
 use templr::{FnTemplate, Template, templ, templ_ret};
 use utils::datastar;
 
+pub mod layouts;
+pub mod pages;
+
 pub fn index<'a>() -> templ_ret!['a] {
     templ! {
         #use children;
         <!DOCTYPE html>
-        <html>
+        <html lang="en">
             <head>
                 <title>Rust Starter</title>
                 <meta charset="UTF-8" />
@@ -18,22 +19,34 @@ pub fn index<'a>() -> templ_ret!['a] {
                 <link href="/public/css/index.css" rel="stylesheet" />
                 <script type="module" src="/public/js/datastar.js"></script>
             </head>
-            <body>
+            <body class="min-h-screen bg-background">
                 #children;
             </body>
         </html>
     }
 }
 
-pub fn render<'a>(f: Box<dyn Template + Send>, headers: &HeaderMap) -> Response<Body> {
-    let datastar_req = datastar::is_request(headers);
+pub enum Layout {
+    Main,
+}
 
-    FnTemplate::new(move |w, ctx, _| {
-        if datastar_req {
-            f.render_into(w, ctx)
-        } else {
-            index().render_with_children_into(w, ctx, &*f)
+pub fn render<'a>(
+    f: Box<dyn Template + Send>,
+    layout: Layout,
+    headers: &HeaderMap,
+) -> Response<Body> {
+    let layout_template = FnTemplate::new(move |w, ctx, _| {
+        match layout {
+            Layout::Main => layouts::main::main(),
         }
-    })
-    .into_response()
+        .render_with_children_into(w, ctx, &*f)
+    });
+
+    match datastar::is_request(headers) {
+        false => FnTemplate::new(move |w, ctx, _| {
+            index().render_with_children_into(w, ctx, &layout_template)
+        })
+        .into_response(),
+        true => layout_template.into_response(),
+    }
 }

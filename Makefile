@@ -3,11 +3,11 @@ include DEVOPS/dev/.env
 DIESEL_CMD := ~/.cargo/bin/diesel
 SCHEMA_FILE := libs/schemas/lib.rs
 
-dev live: docker-postgres
-	bacon ./app run
+app live: docker-postgres
+	cargo watch -q -C ./app -x 'run -- ../DEVOPS/dev/.env'
 
 tw:
-	npx @tailwindcss/cli -i libs/templates/styles.css -o app/public/css/index.css
+	npx @tailwindcss/cli -i app/app.css -o app/public/css/index.css --watch
 
 migrate:
 	${DIESEL_CMD} migration run --config-file=diesel.toml --database-url ${DATABASE_URL}
@@ -17,10 +17,10 @@ migrate-redo:
 
 diesel:
 	@echo "Fetching schemas from database and writing to $(SCHEMA_FILE)..."
-	# 1. Clear the target file first using '>'
+	# Clear the target file
 	@echo "" > $(SCHEMA_FILE)
 
-	# 2. Run the complex shell logic (all on one logical line via '\')
+	# Find all schemas
 	@SCHEMAS=$$(PGPASSWORD='${DB_PASSWORD}' psql -h 127.0.0.1 -p ${DB_PORT} -U ${DB_USER} -d ${DB_NAME} -Atc "SELECT schema_name FROM information_schema.schemata WHERE schema_name NOT IN ('pg_catalog', 'information_schema', 'pg_toast')"); \
 	echo "Schemas found: $$SCHEMAS"; \
 	for SCHEMA in $$SCHEMAS; do \
@@ -31,7 +31,7 @@ diesel:
 	@echo "Schema generation complete."
 
 docker-postgres:
-	systemctl start docker
+	@systemctl is-active --quiet docker || sudo systemctl start docker
 	docker compose -f DEVOPS/dev/docker-compose.yml --env-file=DEVOPS/dev/.env up -d rust_starter_db --remove-orphans
 
 docker-postgres-stop:

@@ -11,7 +11,6 @@ use crate::{
     services::ServiceManager,
 };
 
-mod app_router;
 mod app_templates;
 mod context;
 mod env;
@@ -38,14 +37,14 @@ async fn main() {
     let repos = RepositoryManager::default();
     let svc = ServiceManager::default(pool, repos);
     let ctx = AppState { cfg, svc };
-    let router = app_router::build_router(ctx.clone());
+    let router = routes::build_router(ctx.clone());
 
-    let addr = format!("0.0.0.0:{}", ctx.cfg.port);
+    let addr = format!("localhost:{}", ctx.cfg.port);
     let listener = TcpListener::bind(&addr)
         .await
         .expect(&format!("Could not listen on: {}", &addr));
 
-    println!("Listening on: {}", &addr);
+    println!("Listening on: {}", format!("http://{}", addr));
 
     axum::serve(listener, router)
         .await
