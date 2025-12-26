@@ -1,3 +1,4 @@
 pub mod hello_world;
 pub mod home;
-pub mod me;
+pub mod login;
+pub mod sign_up;

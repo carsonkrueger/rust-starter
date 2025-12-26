@@ -1,6 +1,8 @@
 use templr::{templ, templ_ret};
 
 pub mod home;
+pub mod login;
+pub mod sign_up;
 
 const PAGE_LAYOUT_ID: &'static str = "page-layout";
 

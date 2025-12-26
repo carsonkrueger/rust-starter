@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use axum::response::IntoResponse;
+use axum::{http::StatusCode, response::IntoResponse};
 
 use crate::{
     repositories::{self, DBPool, RepositoryManager},
@@ -54,6 +54,15 @@ impl<E: std::error::Error + 'static> From<bb8::RunError<E>> for Error {
 
 impl IntoResponse for Error {
     fn into_response(self) -> axum::response::Response {
-        todo!()
+        match self {
+            Error::Generic(msg) => (StatusCode::INTERNAL_SERVER_ERROR, msg).into_response(),
+            Error::InvalidCredentials => {
+                (StatusCode::UNAUTHORIZED, "Invalid credentials").into_response()
+            }
+            Error::Repository(err) => {
+                (StatusCode::INTERNAL_SERVER_ERROR, err.to_string()).into_response()
+            }
+            Error::Bb8(msg) => (StatusCode::INTERNAL_SERVER_ERROR, msg).into_response(),
+        }
     }
 }

@@ -17,7 +17,7 @@ pub fn index<'a>() -> templ_ret!['a] {
                 <meta charset="UTF-8" />
                 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
                 <link href="/public/css/index.css" rel="stylesheet" />
-                <script type="module" src="/public/js/datastar.js"></script>
+                <script type="module" src="/public/js/datastar.js" />
             </head>
             <body class="min-h-screen bg-background">
                 #children;
@@ -35,18 +35,19 @@ pub fn render<'a>(
     layout: Layout,
     headers: &HeaderMap,
 ) -> Response<Body> {
-    let layout_template = FnTemplate::new(move |w, ctx, _| {
-        match layout {
-            Layout::Main => layouts::main::main(),
-        }
-        .render_with_children_into(w, ctx, &*f)
-    });
-
     match datastar::is_request(headers) {
-        false => FnTemplate::new(move |w, ctx, _| {
-            index().render_with_children_into(w, ctx, &layout_template)
-        })
-        .into_response(),
-        true => layout_template.into_response(),
+        false => {
+            let layout_template = FnTemplate::new(move |w, ctx, _| {
+                match layout {
+                    Layout::Main => layouts::main::main(),
+                }
+                .render_with_children_into(w, ctx, &*f)
+            });
+            FnTemplate::new(move |w, ctx, _| {
+                index().render_with_children_into(w, ctx, &layout_template)
+            })
+            .into_response()
+        }
+        true => FnTemplate::new(move |w, ctx, _| f.render_into(w, ctx)).into_response(),
     }
 }

@@ -68,8 +68,10 @@ impl AuthService for Auth {
             password: sign_up.password, // TODO: hash me
             ..Default::default()
         };
+        dbg!(&user);
         let mut conn = self.pool.get().await?;
         self.repos.users.insert(&mut conn, &mut user).await?;
+        dbg!(&user);
         Ok(user)
     }
 }

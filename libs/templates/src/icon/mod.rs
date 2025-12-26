@@ -70,6 +70,7 @@ fn generate_svg(icon: Icon, props: &IconProps<'_>) -> Result<String, std::fmt::E
     let stroke = props.stroke;
     let stroke_width = props.stroke_width;
     let class = props.class;
+    let color = props.color;
 
     let mut svg = String::new();
     write!(
@@ -78,6 +79,7 @@ fn generate_svg(icon: Icon, props: &IconProps<'_>) -> Result<String, std::fmt::E
             width="{size}"
             height="{size}"
             viewBox="0 0 24 24"
+            color="{color}"
             fill="{fill}"
             stroke="{stroke}"
             stroke-width="{stroke_width}"

@@ -1,4 +1,7 @@
-use crate::{routes::public::me::MeRoute, services};
+use crate::{
+    routes::public::{login::LoginRoute, sign_up::SignUpRoute},
+    services,
+};
 use axum::{
     http::StatusCode,
     response::{IntoResponse, Redirect},
@@ -15,7 +18,7 @@ use axum::{
     Router,
     middleware::{self},
 };
-use tower_http::services::ServeDir;
+use tower_http::{services::ServeDir, trace::TraceLayer};
 
 pub mod public;
 
@@ -57,11 +60,13 @@ pub fn build_router(ctx: AppState) -> Router {
         // ^^^ Private Routes Above ^^^
         .layer(middleware::from_fn_with_state(ctx.clone(), auth_middleware))
         // === Public Routes Below ===
-        .nest(MeRoute::PATH, MeRoute::router())
         .nest(HomeRoute::PATH, HomeRoute::router())
+        .nest(LoginRoute::PATH, LoginRoute::router())
+        .nest(SignUpRoute::PATH, SignUpRoute::router())
         .nest(HelloWorldRoute::PATH, HelloWorldRoute::router())
         .nest_service("/public", ServeDir::new("public"))
         .route("/", get(|| async { Redirect::permanent("/home") }))
+        .layer(TraceLayer::new_for_http())
         // ^^^ Public Routes Above ^^^
         .with_state(ctx)
 }
