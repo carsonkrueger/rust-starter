@@ -31,6 +31,7 @@ impl NestedRouter<AppState> for SignUpRoute {
 }
 
 async fn sign_up_page(headers: HeaderMap) -> impl IntoResponse {
+    trace!("->> sign_up_page");
     let page = pages::sign_up::page();
     app_templates::render(Box::new(page), Layout::Main, &headers)
 }
@@ -42,7 +43,7 @@ async fn sign_up(
     }): State<AppState>,
     Json(sign_up): Json<SignUp>,
 ) -> RouteResult<impl IntoResponse> {
-    trace!("->> POST /sign_up");
+    trace!("->> /sign_up");
     auth.sign_up(sign_up).await?;
     Ok(StatusCode::OK)
 }

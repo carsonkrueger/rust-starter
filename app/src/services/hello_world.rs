@@ -1,4 +1,5 @@
 use async_trait::async_trait;
+use tracing::trace;
 
 #[async_trait]
 pub trait HelloWorldService {
@@ -15,6 +16,7 @@ impl HelloWorldService for HelloWorld {
         Self {}
     }
     async fn hello_world(&self) -> String {
+        trace!("->> hello_world");
         "Hello World!".into()
     }
 }

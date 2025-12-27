@@ -1,4 +1,5 @@
 use axum::{Router, http::HeaderMap, response::IntoResponse, routing::get};
+use tracing::trace;
 
 use crate::{
     app_templates::{
@@ -23,6 +24,7 @@ impl NestedRouter<AppState> for HomeRoute {
 }
 
 async fn home_page(headers: HeaderMap) -> impl IntoResponse {
+    trace!("->> home_page");
     let page = pages::home::page();
     app_templates::render(Box::new(page), Layout::Main, &headers)
 }

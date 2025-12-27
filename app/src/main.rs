@@ -3,7 +3,7 @@ use std::{path::Path, time::Duration};
 use bb8::Pool;
 use diesel_async::pooled_connection::AsyncDieselConnectionManager;
 use tokio::net::TcpListener;
-use tracing::level_filters::LevelFilter;
+use tracing_subscriber::EnvFilter;
 
 use crate::{
     context::AppState,
@@ -37,19 +37,26 @@ async fn main() {
 
     let repos = RepositoryManager::default();
     let svc = ServiceManager::default(pool, repos);
-    let ctx = AppState { cfg, svc };
+    let ctx = AppState {
+        cfg: cfg.clone(),
+        svc,
+    };
     let router = routes::build_router(ctx.clone());
 
-    tracing_subscriber::fmt()
-        .with_max_level(LevelFilter::DEBUG)
-        .init();
+    let filter = EnvFilter::new("")
+        .add_directive("app=trace".parse().unwrap())
+        .add_directive("utils=warn".parse().unwrap())
+        .add_directive("templates=error".parse().unwrap())
+        .add_directive("models=error".parse().unwrap())
+        .add_directive("schemas=error".parse().unwrap());
+    tracing_subscriber::fmt().with_env_filter(filter).init();
 
     let addr = format!("localhost:{}", ctx.cfg.port);
     let listener = TcpListener::bind(&addr)
         .await
         .expect(&format!("Could not listen on: {}", &addr));
 
-    println!("Listening on: {}", format!("http://{}", addr));
+    println!("Listening on: http://{}", addr);
 
     axum::serve(listener, router)
         .await

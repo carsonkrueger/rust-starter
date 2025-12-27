@@ -6,6 +6,7 @@ use axum::{
     routing::{get, post},
 };
 use models::api::auth::Login;
+use tracing::trace;
 
 use crate::{
     app_templates::{self, Layout, pages},
@@ -30,6 +31,7 @@ impl NestedRouter<AppState> for LoginRoute {
 }
 
 async fn login_page(headers: HeaderMap) -> impl IntoResponse {
+    trace!("->> login_page");
     let page = pages::login::page();
     app_templates::render(Box::new(page), Layout::Main, &headers)
 }
@@ -41,6 +43,7 @@ async fn login(
     }): State<AppState>,
     Form(login): Form<Login>,
 ) -> RouteResult<impl IntoResponse> {
+    trace!("->> login");
     let _ = auth.login(login).await?;
     Ok(StatusCode::OK)
 }

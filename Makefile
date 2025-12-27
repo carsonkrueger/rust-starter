@@ -3,7 +3,7 @@ include DEVOPS/dev/.env
 DIESEL_CMD := ~/.cargo/bin/diesel
 SCHEMA_FILE := libs/schemas/lib.rs
 
-app live: docker-postgres
+app: docker-postgres
 	cargo watch -q -C ./app -x 'run -- ../DEVOPS/dev/.env'
 
 tw:
@@ -32,10 +32,10 @@ diesel:
 
 docker-postgres:
 	@systemctl is-active --quiet docker || sudo systemctl start docker
-	docker compose -f DEVOPS/dev/docker-compose.yml --env-file=DEVOPS/dev/.env up -d rust_starter_db --remove-orphans
+	docker compose -f DEVOPS/dev/docker-compose.yml --env-file=DEVOPS/dev/.env up -d app_db --remove-orphans
 
 docker-postgres-stop:
-	docker compose -f DEVOPS/dev/docker-compose.yml --env-file=DEVOPS/dev/.env down rust_starter_db
+	docker compose -f DEVOPS/dev/docker-compose.yml --env-file=DEVOPS/dev/.env down app_db
 
 rm-docker-postgres:
-	docker compose -f DEVOPS/dev/docker-compose.yml --env-file=DEVOPS/dev/.env down rust_starter_db -v
+	docker compose -f DEVOPS/dev/docker-compose.yml --env-file=DEVOPS/dev/.env down app_db -v

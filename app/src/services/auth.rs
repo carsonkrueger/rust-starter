@@ -10,6 +10,7 @@ use models::{
     api::auth::{Login, SignUp},
     db::auth::{session::Session, user::User},
 };
+use tracing::trace;
 use utils::auth;
 
 // #[async_trait]
@@ -32,6 +33,7 @@ impl AuthService for Auth {
         Self { pool, repos }
     }
     async fn login(&self, login: Login) -> ServiceResult<(User, Session)> {
+        trace!("->> login");
         let mut conn = self.pool.get().await?;
         let user = self
             .repos
@@ -53,6 +55,7 @@ impl AuthService for Auth {
         return Ok((user, session));
     }
     async fn get_user_by_auth(&self, parts: &auth::AuthParts) -> ServiceResult<User> {
+        trace!("->> get_user_by_auth");
         let mut conn = self.pool.get().await?;
         Ok(self
             .repos
@@ -61,6 +64,7 @@ impl AuthService for Auth {
             .await?)
     }
     async fn sign_up(&self, sign_up: SignUp) -> ServiceResult<User> {
+        trace!("->> sign_up");
         let mut user = User {
             email: sign_up.email,
             first_name: sign_up.first_name,

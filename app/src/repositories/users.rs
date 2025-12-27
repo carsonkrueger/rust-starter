@@ -4,6 +4,7 @@ use diesel::prelude::*;
 use diesel_async::RunQueryDsl;
 use models::db::auth::user::User;
 use schemas::auth::users;
+use tracing::trace;
 
 use crate::repositories::RepositoryResult;
 
@@ -23,6 +24,7 @@ impl UsersRepository for Users {
         Self {}
     }
     async fn insert(&self, db: &mut DbConn, user: &mut User) -> RepositoryResult<()> {
+        trace!("->> insert");
         *user = diesel::insert_into(users::table)
             .values(&*user)
             .returning(User::as_returning())
@@ -31,9 +33,11 @@ impl UsersRepository for Users {
         Ok(())
     }
     async fn get_one(&self, db: &mut DbConn, pk: i64) -> RepositoryResult<User> {
+        trace!("->> get_one");
         Ok(users::table.find(pk).first(db).await?)
     }
     async fn get_by_email(&self, db: &mut DbConn, email: &str) -> RepositoryResult<User> {
+        trace!("->> get_by_email");
         Ok(users::table
             .filter(users::email.eq(email))
             .first(db)

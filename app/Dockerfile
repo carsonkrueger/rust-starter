@@ -23,7 +23,7 @@ WORKDIR /usr/local/bin
 
 RUN apk add --no-cache postgresql-client bash
 
-COPY --from=builder /app/target/release/rust_starter .
+COPY --from=builder /app/target/release/app .
 COPY entrypoint.sh .
 
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]

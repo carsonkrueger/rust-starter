@@ -1,4 +1,5 @@
 use axum::{Router, extract::State, response::IntoResponse, routing::get};
+use tracing::trace;
 
 use crate::{
     context::AppState,
@@ -25,5 +26,6 @@ async fn hello_world(
         ..
     }): State<AppState>,
 ) -> impl IntoResponse {
+    trace!("->> hello_world");
     hello_world.hello_world().await
 }
