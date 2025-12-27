@@ -8,3 +8,4 @@ axum = "0.8.7"
 axum-extra = { version = "0.12.2", features = ["cookie"] }
 thiserror = "2.0.17"
 models = { path = "../models" }
+argon2 = { version = "0.5.3", features = ["std"] }

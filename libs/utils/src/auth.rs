@@ -1,5 +1,9 @@
 use std::fmt;
 
+use argon2::{
+    PasswordHash, PasswordVerifier,
+    password_hash::{self, PasswordHasher, SaltString, rand_core::OsRng},
+};
 use axum::{
     body::Body,
     http::{Response, StatusCode},
@@ -48,6 +52,15 @@ pub struct AuthParts {
     pub id: i64,
 }
 
+impl Default for AuthParts {
+    fn default() -> Self {
+        AuthParts {
+            token: String::new(),
+            id: 0,
+        }
+    }
+}
+
 impl TryFrom<&str> for AuthParts {
     type Error = Error;
 
@@ -74,4 +87,17 @@ impl<'c> Into<Cookie<'c>> for AuthParts {
     fn into(self) -> Cookie<'c> {
         Cookie::new(COOKIE_NAME, format!("{}|{}", self.token, self.id))
     }
+}
+
+pub fn hash_password<'a>(password: &str) -> password_hash::Result<String> {
+    let argon = argon2::Argon2::default();
+    let salt = &SaltString::generate(&mut OsRng);
+    let hash = argon.hash_password(password.as_bytes(), salt)?;
+    Ok(hash.to_string())
+}
+
+pub fn verify_password(password: &str, hash: &str) -> password_hash::Result<()> {
+    let argon = argon2::Argon2::default();
+    let parsed_hash = PasswordHash::new(hash)?;
+    argon.verify_password(password.as_bytes(), &parsed_hash)
 }

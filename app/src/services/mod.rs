@@ -44,6 +44,8 @@ pub enum Error {
     Repository(#[from] repositories::Error),
     #[error("bb8 err: {0}")]
     Bb8(String),
+    #[error("hash err: {0}")]
+    Hash(#[from] utils::prelude::Error),
 }
 
 impl<E: std::error::Error + 'static> From<bb8::RunError<E>> for Error {
@@ -56,7 +58,7 @@ impl IntoResponse for Error {
     fn into_response(self) -> axum::response::Response {
         match self {
             Error::Generic(msg) => (StatusCode::INTERNAL_SERVER_ERROR, msg).into_response(),
-            Error::InvalidCredentials => {
+            Error::InvalidCredentials | Error::Hash(_) => {
                 (StatusCode::UNAUTHORIZED, "Invalid credentials").into_response()
             }
             Error::Repository(err) => {

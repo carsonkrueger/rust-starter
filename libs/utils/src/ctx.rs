@@ -1,10 +1,9 @@
-use crate::auth::{AuthParts, AuthResult, Error};
+use crate::auth::{AuthResult, Error};
 use axum::{extract::FromRequestParts, http::request::Parts};
 use models::db::auth::user::User;
 
 #[derive(Clone, Debug)]
 pub struct Ctx {
-    pub auth: AuthParts,
     pub user: User,
 }
 
@@ -22,3 +21,11 @@ impl<S: Send + Sync> FromRequestParts<S> for Ctx {
             .clone())
     }
 }
+
+#[derive(thiserror::Error, Debug, Clone)]
+pub enum CtxError {
+    #[error("invalid ctx: {0}")]
+    Invalid(String),
+}
+
+pub type CtxResult = Result<Ctx, CtxError>;

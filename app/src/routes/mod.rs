@@ -1,13 +1,14 @@
 use crate::{
+    middlewares::trace::trace_middleware,
     routes::public::{login::LoginRoute, sign_up::SignUpRoute},
     services,
 };
 use axum::{
-    http::StatusCode,
     response::{IntoResponse, Redirect},
     routing::get,
 };
-use utils::auth;
+use tracing::{error, warn};
+use utils::{auth, ctx};
 
 use crate::{
     context::AppState,
@@ -32,13 +33,25 @@ pub enum Error {
     Service(#[from] services::Error),
     #[error(transparent)]
     Auth(#[from] auth::Error),
+    #[error(transparent)]
+    Ctx(#[from] ctx::CtxError),
 }
 
 impl IntoResponse for Error {
     fn into_response(self) -> axum::response::Response {
         match self {
-            Error::Service(e) => e.into_response(),
-            _ => StatusCode::INTERNAL_SERVER_ERROR.into_response(),
+            Error::Service(e) => {
+                error!(error = %e, "service error");
+                e.into_response()
+            }
+            Error::Auth(e) => {
+                warn!(error = %e, "auth error");
+                e.into_response()
+            }
+            Error::Ctx(e) => {
+                warn!(error = %e, "ctx error");
+                "ctx error".into_response() // todo fix me
+            }
         }
     }
 }
@@ -58,7 +71,7 @@ pub fn build_router(ctx: AppState) -> Router {
     Router::new()
         // === Private Routes Below ===
         // ^^^ Private Routes Above ^^^
-        .layer(middleware::from_fn_with_state(ctx.clone(), auth_middleware))
+        .layer(middleware::from_fn(auth_middleware))
         // === Public Routes Below ===
         .nest(HomeRoute::PATH, HomeRoute::router())
         .nest(LoginRoute::PATH, LoginRoute::router())
@@ -67,6 +80,10 @@ pub fn build_router(ctx: AppState) -> Router {
         .nest_service("/public", ServeDir::new("public"))
         .route("/", get(|| async { Redirect::permanent("/home") }))
         .layer(TraceLayer::new_for_http())
+        .layer(middleware::from_fn_with_state(
+            ctx.clone(),
+            trace_middleware,
+        ))
         // ^^^ Public Routes Above ^^^
         .with_state(ctx)
 }

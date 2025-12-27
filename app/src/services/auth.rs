@@ -4,14 +4,14 @@ use crate::{
     repositories::{
         DBPool, RepositoryManager, sessions::SessionsRepository, users::UsersRepository,
     },
-    services::{Error, ServiceResult},
+    services::ServiceResult,
 };
 use models::{
     api::auth::{Login, SignUp},
     db::auth::{session::Session, user::User},
 };
 use tracing::trace;
-use utils::auth;
+use utils::auth::{self, verify_password};
 
 // #[async_trait]
 pub trait AuthService {
@@ -41,9 +41,7 @@ impl AuthService for Auth {
             .get_by_email(&mut conn, &login.email)
             .await?;
 
-        if user.password != login.password {
-            return Err(Error::InvalidCredentials);
-        }
+        verify_password(&login.password, &user.password)?;
 
         let mut session = Session {
             user_id: user.id,
@@ -69,11 +67,12 @@ impl AuthService for Auth {
             email: sign_up.email,
             first_name: sign_up.first_name,
             last_name: sign_up.last_name,
-            password: sign_up.password, // TODO: hash me
+            password: utils::auth::hash_password(&sign_up.password)?,
             ..Default::default()
         };
         dbg!(&user);
         let mut conn = self.pool.get().await?;
+
         self.repos.users.insert(&mut conn, &mut user).await?;
         dbg!(&user);
         Ok(user)
