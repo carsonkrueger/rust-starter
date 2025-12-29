@@ -4,6 +4,7 @@ use bb8::Pool;
 use diesel_async::pooled_connection::AsyncDieselConnectionManager;
 use tokio::net::TcpListener;
 use tracing_subscriber::EnvFilter;
+use utils::auth::privileges::Privilege;
 
 use crate::{
     context::AppState,
@@ -11,6 +12,8 @@ use crate::{
     repositories::{DbConn, RepositoryManager},
     services::ServiceManager,
 };
+
+use utils::prelude::IntoEnumIterator;
 
 mod app_templates;
 mod context;
@@ -41,6 +44,11 @@ async fn main() {
         cfg: cfg.clone(),
         svc,
     };
+
+
+    let privs = Privilege::iter();
+    // repos.privileges.insert_many
+
     let router = routes::build_router(ctx.clone());
 
     let filter = EnvFilter::new("")

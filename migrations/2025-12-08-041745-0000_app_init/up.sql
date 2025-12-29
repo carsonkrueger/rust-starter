@@ -55,3 +55,5 @@ CREATE TABLE IF NOT EXISTS auth.sessions (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (user_id, token)
 );
+
+INSERT INTO auth.roles (name) VALUES ('admin'), ('basic');

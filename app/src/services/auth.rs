@@ -2,16 +2,21 @@ use std::sync::Arc;
 
 use crate::{
     repositories::{
-        DBPool, RepositoryManager, sessions::SessionsRepository, users::UsersRepository,
+        DBPool, RepositoryManager, privileges::PrivilegesRepository, sessions::SessionsRepository,
+        users::UsersRepository,
     },
     services::ServiceResult,
 };
 use models::{
     api::auth::{Login, SignUp},
-    db::auth::{session::Session, user::User},
+    db::auth::{privilege::Privilege, session::Session, user::User},
 };
 use tracing::trace;
-use utils::auth::{self, verify_password};
+use utils::auth::{
+    self,
+    hash::{hash_password, verify_password},
+    roles::ROLE_BASIC,
+};
 
 // #[async_trait]
 pub trait AuthService {
@@ -19,6 +24,7 @@ pub trait AuthService {
     async fn login(&self, login: Login) -> ServiceResult<(User, Session)>;
     async fn sign_up(&self, sign_up: SignUp) -> ServiceResult<User>;
     async fn get_user_by_auth(&self, parts: &auth::AuthParts) -> ServiceResult<User>;
+    async fn get_privileges(&self, role_id: i16) -> ServiceResult<Vec<Privilege>>;
 }
 
 #[derive(Debug, Clone)]
@@ -67,14 +73,22 @@ impl AuthService for Auth {
             email: sign_up.email,
             first_name: sign_up.first_name,
             last_name: sign_up.last_name,
-            password: utils::auth::hash_password(&sign_up.password)?,
+            password: hash_password(&sign_up.password)?,
+            role_id: ROLE_BASIC,
             ..Default::default()
         };
-        dbg!(&user);
         let mut conn = self.pool.get().await?;
 
         self.repos.users.insert(&mut conn, &mut user).await?;
-        dbg!(&user);
         Ok(user)
+    }
+    async fn get_privileges(&self, role_id: i16) -> ServiceResult<Vec<Privilege>> {
+        let mut conn = self.pool.get().await?;
+        let privileges = self
+            .repos
+            .privileges
+            .get_by_role(&mut conn, role_id)
+            .await?;
+        Ok(privileges)
     }
 }

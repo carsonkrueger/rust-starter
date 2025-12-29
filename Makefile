@@ -15,6 +15,9 @@ migrate:
 migrate-redo:
 	${DIESEL_CMD} migration redo --config-file=diesel.toml --database-url ${DATABASE_URL}
 
+migrate-down:
+	${DIESEL_CMD} migration revert --config-file=diesel.toml --database-url ${DATABASE_URL}
+
 diesel:
 	@echo "Fetching schemas from database and writing to $(SCHEMA_FILE)..."
 	# Clear the target file

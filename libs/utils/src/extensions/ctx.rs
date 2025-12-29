@@ -1,10 +1,13 @@
-use crate::auth::{AuthResult, Error};
+use std::collections::HashSet;
+
+use crate::auth::{AuthResult, Error, privileges::Privilege};
 use axum::{extract::FromRequestParts, http::request::Parts};
 use models::db::auth::user::User;
 
 #[derive(Clone, Debug)]
 pub struct Ctx {
     pub user: User,
+    pub privileges: HashSet<Privilege>,
 }
 
 impl<S: Send + Sync> FromRequestParts<S> for Ctx {

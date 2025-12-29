@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+
 use axum::{
     body::Body,
     extract::{Request, State},
@@ -7,7 +9,10 @@ use axum::{
 use axum_extra::extract::CookieJar;
 
 use tracing::Span;
-use utils::ctx::{Ctx, CtxError};
+use utils::{
+    auth::privileges::Privilege,
+    extensions::ctx::{Ctx, CtxError},
+};
 
 use crate::{
     context::AppState,
@@ -35,8 +40,15 @@ pub async fn trace_middleware(
         Ok(u) => {
             let span = Span::current();
             span.record("user_id", u.id);
-            req.extensions_mut().insert(span);
-            Ok(Ctx { user: u })
+            let db_privileges = auth.get_privileges(u.role_id).await?;
+            let privileges: Result<HashSet<Privilege>, _> = db_privileges
+                .into_iter()
+                .map(TryInto::<Privilege>::try_into)
+                .collect();
+            Ok(Ctx {
+                user: u,
+                privileges: privileges?,
+            })
         }
         Err(e) => Err(CtxError::Invalid(e.to_string())),
     };

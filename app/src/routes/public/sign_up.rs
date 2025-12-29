@@ -1,8 +1,8 @@
 use axum::{
     Json, Router,
     extract::State,
-    http::{HeaderMap, StatusCode},
-    response::IntoResponse,
+    http::HeaderMap,
+    response::{IntoResponse, Redirect},
     routing::{get, post},
 };
 use models::api::auth::SignUp;
@@ -43,7 +43,7 @@ async fn sign_up(
     }): State<AppState>,
     Json(sign_up): Json<SignUp>,
 ) -> RouteResult<impl IntoResponse> {
-    trace!("->> /sign_up");
+    trace!("->> sign_up");
     auth.sign_up(sign_up).await?;
-    Ok(StatusCode::OK)
+    Ok(Redirect::temporary("/login"))
 }

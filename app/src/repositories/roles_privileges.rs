@@ -1,0 +1,43 @@
+use crate::repositories::DbConn;
+use diesel::SelectableHelper;
+use models::db::auth::role_privilege::RolePrivilege;
+
+use diesel_async::RunQueryDsl;
+use schemas::auth::roles_privileges;
+use tracing::trace;
+
+use crate::repositories::RepositoryResult;
+
+#[allow(unused)]
+pub trait RolesPrivilegesRepository {
+    fn new() -> Self;
+    async fn add_many(
+        &self,
+        db: &mut DbConn,
+        role_privs: &[RolePrivilege],
+    ) -> RepositoryResult<Vec<RolePrivilege>>;
+}
+
+#[derive(Debug)]
+pub struct RolesPrivileges;
+
+impl RolesPrivilegesRepository for RolesPrivileges {
+    fn new() -> Self {
+        Self {}
+    }
+    async fn add_many(
+        &self,
+        db: &mut DbConn,
+        role_privs: &[RolePrivilege],
+    ) -> RepositoryResult<Vec<RolePrivilege>> {
+        trace!("->> add_many");
+        let res = diesel::insert_into(roles_privileges::table)
+            .values(role_privs)
+            .on_conflict((roles_privileges::role_id, roles_privileges::privilege_id))
+            .do_nothing()
+            .returning(RolePrivilege::as_returning())
+            .get_results(db)
+            .await?;
+        Ok(res)
+    }
+}

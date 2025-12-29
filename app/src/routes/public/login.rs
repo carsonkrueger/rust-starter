@@ -1,12 +1,14 @@
 use axum::{
-    Form, Router,
+    Json, Router,
     extract::State,
-    http::{HeaderMap, StatusCode},
+    http::HeaderMap,
     response::IntoResponse,
     routing::{get, post},
 };
+use axum_extra::extract::{CookieJar, cookie::Cookie};
 use models::api::auth::Login;
 use tracing::trace;
+use utils::auth::AuthParts;
 
 use crate::{
     app_templates::{self, Layout, pages},
@@ -41,9 +43,15 @@ async fn login(
         svc: ServiceManager { auth, .. },
         ..
     }): State<AppState>,
-    Form(login): Form<Login>,
+    jar: CookieJar,
+    Json(login): Json<Login>,
 ) -> RouteResult<impl IntoResponse> {
     trace!("->> login");
-    let _ = auth.login(login).await?;
-    Ok(StatusCode::OK)
+    let (user, session) = auth.login(login).await?;
+    let cookie: Cookie = AuthParts {
+        id: user.id,
+        token: session.token,
+    }
+    .into();
+    Ok(jar.add(cookie))
 }

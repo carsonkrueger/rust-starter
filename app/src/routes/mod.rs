@@ -1,14 +1,20 @@
 use crate::{
     middlewares::trace::trace_middleware,
-    routes::public::{login::LoginRoute, sign_up::SignUpRoute},
+    routes::{
+        private::management::ManagementRoute,
+        public::{login::LoginRoute, sign_up::SignUpRoute},
+    },
     services,
 };
 use axum::{
+    body::Body,
+    http::{Request, StatusCode},
     response::{IntoResponse, Redirect},
     routing::get,
 };
-use tracing::{error, warn};
-use utils::{auth, ctx};
+use tracing::{error, info_span, warn};
+use utils::{auth, extensions::ctx, prelude::ParseError};
+use uuid::Uuid;
 
 use crate::{
     context::AppState,
@@ -21,6 +27,7 @@ use axum::{
 };
 use tower_http::{services::ServeDir, trace::TraceLayer};
 
+pub mod private;
 pub mod public;
 
 #[allow(unused)]
@@ -35,6 +42,8 @@ pub enum Error {
     Auth(#[from] auth::Error),
     #[error(transparent)]
     Ctx(#[from] ctx::CtxError),
+    #[error(transparent)]
+    Strum(#[from] ParseError),
 }
 
 impl IntoResponse for Error {
@@ -50,7 +59,11 @@ impl IntoResponse for Error {
             }
             Error::Ctx(e) => {
                 warn!(error = %e, "ctx error");
-                "ctx error".into_response() // todo fix me
+                StatusCode::UNAUTHORIZED.into_response()
+            }
+            Error::Strum(e) => {
+                error!(error = %e, "strum error");
+                StatusCode::INTERNAL_SERVER_ERROR.into_response()
             }
         }
     }
@@ -67,23 +80,32 @@ pub trait NestedRouterPath {
     const PATH: &str;
 }
 
-pub fn build_router(ctx: AppState) -> Router {
+pub fn build_router(app_state: AppState) -> Router {
+    let trace_layer = TraceLayer::new_for_http().make_span_with(|_req: &Request<Body>| {
+        info_span!(
+            "http.request",
+            req_id = Uuid::now_v7().to_string(),
+            user_id = tracing::field::Empty
+        )
+    });
+
     Router::new()
-        // === Private Routes Below ===
-        // ^^^ Private Routes Above ^^^
+        // === Private Routes Begin ===
+        .nest(ManagementRoute::PATH, ManagementRoute::router())
+        // === Private Routes End ===
         .layer(middleware::from_fn(auth_middleware))
-        // === Public Routes Below ===
+        // === Public Routes Begin ===
         .nest(HomeRoute::PATH, HomeRoute::router())
         .nest(LoginRoute::PATH, LoginRoute::router())
         .nest(SignUpRoute::PATH, SignUpRoute::router())
         .nest(HelloWorldRoute::PATH, HelloWorldRoute::router())
         .nest_service("/public", ServeDir::new("public"))
         .route("/", get(|| async { Redirect::permanent("/home") }))
-        .layer(TraceLayer::new_for_http())
+        // === Public Routes End ===
         .layer(middleware::from_fn_with_state(
-            ctx.clone(),
+            app_state.clone(),
             trace_middleware,
         ))
-        // ^^^ Public Routes Above ^^^
-        .with_state(ctx)
+        .layer(trace_layer)
+        .with_state(app_state)
 }

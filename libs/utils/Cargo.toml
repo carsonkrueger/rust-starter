@@ -9,3 +9,5 @@ axum-extra = { version = "0.12.2", features = ["cookie"] }
 thiserror = "2.0.17"
 models = { path = "../models" }
 argon2 = { version = "0.5.3", features = ["std"] }
+strum = { version = "0.27.2", features = ["derive"] }
+time = "0.3.44"

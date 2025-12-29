@@ -1,15 +1,19 @@
 use std::fmt;
 
-use argon2::{
-    PasswordHash, PasswordVerifier,
-    password_hash::{self, PasswordHasher, SaltString, rand_core::OsRng},
-};
 use axum::{
     body::Body,
     http::{Response, StatusCode},
     response::IntoResponse,
 };
-use axum_extra::extract::{CookieJar, cookie::Cookie};
+use axum_extra::extract::{
+    CookieJar,
+    cookie::{Cookie, SameSite},
+};
+use time::Duration;
+
+pub mod hash;
+pub mod privileges;
+pub mod roles;
 
 pub type AuthResult<T> = std::result::Result<T, Error>;
 
@@ -85,19 +89,12 @@ impl TryFrom<CookieJar> for AuthParts {
 
 impl<'c> Into<Cookie<'c>> for AuthParts {
     fn into(self) -> Cookie<'c> {
-        Cookie::new(COOKIE_NAME, format!("{}|{}", self.token, self.id))
+        let mut cookie = Cookie::new(COOKIE_NAME, format!("{}|{}", self.token, self.id));
+        cookie.set_http_only(true);
+        cookie.set_secure(true);
+        cookie.set_path("/");
+        cookie.set_same_site(SameSite::Lax);
+        cookie.set_max_age(Duration::days(30));
+        cookie
     }
-}
-
-pub fn hash_password<'a>(password: &str) -> password_hash::Result<String> {
-    let argon = argon2::Argon2::default();
-    let salt = &SaltString::generate(&mut OsRng);
-    let hash = argon.hash_password(password.as_bytes(), salt)?;
-    Ok(hash.to_string())
-}
-
-pub fn verify_password(password: &str, hash: &str) -> password_hash::Result<()> {
-    let argon = argon2::Argon2::default();
-    let parsed_hash = PasswordHash::new(hash)?;
-    argon.verify_password(password.as_bytes(), &parsed_hash)
 }
