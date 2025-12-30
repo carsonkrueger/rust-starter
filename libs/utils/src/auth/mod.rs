@@ -87,6 +87,8 @@ impl TryFrom<CookieJar> for AuthParts {
     }
 }
 
+pub const MAX_COOKIE_AGE_DAYS: u64 = 30;
+
 impl<'c> Into<Cookie<'c>> for AuthParts {
     fn into(self) -> Cookie<'c> {
         let mut cookie = Cookie::new(COOKIE_NAME, format!("{}|{}", self.token, self.id));
@@ -94,7 +96,7 @@ impl<'c> Into<Cookie<'c>> for AuthParts {
         cookie.set_secure(true);
         cookie.set_path("/");
         cookie.set_same_site(SameSite::Lax);
-        cookie.set_max_age(Duration::days(30));
+        cookie.set_max_age(Duration::days(MAX_COOKIE_AGE_DAYS as i64));
         cookie
     }
 }

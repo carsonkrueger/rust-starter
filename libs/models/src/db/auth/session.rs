@@ -14,14 +14,3 @@ pub struct Session {
     #[diesel(skip_insertion)]
     pub created_at: Option<NaiveDateTime>,
 }
-
-impl Default for Session {
-    fn default() -> Self {
-        Self {
-            user_id: 0,
-            token: String::new(),
-            expires_at: None,
-            created_at: None,
-        }
-    }
-}

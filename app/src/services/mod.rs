@@ -4,29 +4,37 @@ use axum::{http::StatusCode, response::IntoResponse};
 
 use crate::{
     repositories::{self, DBPool, RepositoryManager},
-    services::{auth::AuthService, hello_world::HelloWorldService},
+    services::{auth::AuthService, hello_world::HelloWorldService, privileges::PrivilegesService},
 };
 
 pub mod auth;
 pub mod hello_world;
+pub mod privileges;
 
 #[allow(unused)]
 #[derive(Clone, Debug)]
-pub struct ServiceManager<HW: HelloWorldService, AT: AuthService> {
+pub struct ServiceManager<HW: HelloWorldService, AT: AuthService, PS: PrivilegesService> {
     pub hello_world: Arc<HW>,
     pub auth: Arc<AT>,
+    pub privileges: Arc<PS>,
 }
 
-impl<HW, AT> ServiceManager<HW, AT>
+impl<HW, AT, PS> ServiceManager<HW, AT, PS>
 where
     HW: HelloWorldService,
     AT: AuthService,
+    PS: PrivilegesService,
 {
     pub fn default(pool: DBPool, repos: RepositoryManager) -> Self {
         let repos = Arc::new(repos);
         let hello_world = Arc::new(HW::new());
-        let auth = Arc::new(AT::new(pool, repos));
-        Self { hello_world, auth }
+        let auth = Arc::new(AT::new(pool.clone(), repos.clone()));
+        let privileges = Arc::new(PS::new(pool, repos.clone()));
+        Self {
+            hello_world,
+            auth,
+            privileges,
+        }
     }
 }
 

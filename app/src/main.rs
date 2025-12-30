@@ -3,14 +3,18 @@ use std::{path::Path, time::Duration};
 use bb8::Pool;
 use diesel_async::pooled_connection::AsyncDieselConnectionManager;
 use tokio::net::TcpListener;
+use tracing::error;
 use tracing_subscriber::EnvFilter;
-use utils::auth::privileges::Privilege;
+use utils::auth::{privileges::Privilege, roles::ROLE_ADMIN};
 
 use crate::{
     context::AppState,
     env::{config::Config, db_config::DBConfig},
     repositories::{DbConn, RepositoryManager},
-    services::ServiceManager,
+    services::{
+        ServiceManager,
+        privileges::{Privileges, PrivilegesService},
+    },
 };
 
 use utils::prelude::IntoEnumIterator;
@@ -39,17 +43,12 @@ async fn main() {
     let pool = connection_pool(&db_cfg).await;
 
     let repos = RepositoryManager::default();
-    let svc = ServiceManager::default(pool, repos);
+    let svc = ServiceManager::<_, _, Privileges>::default(pool, repos);
+    let priv_service = svc.privileges.clone();
     let ctx = AppState {
         cfg: cfg.clone(),
         svc,
     };
-
-
-    let privs = Privilege::iter();
-    // repos.privileges.insert_many
-
-    let router = routes::build_router(ctx.clone());
 
     let filter = EnvFilter::new("")
         .add_directive("app=trace".parse().unwrap())
@@ -58,6 +57,13 @@ async fn main() {
         .add_directive("models=error".parse().unwrap())
         .add_directive("schemas=error".parse().unwrap());
     tracing_subscriber::fmt().with_env_filter(filter).init();
+
+    let privs: Vec<Privilege> = Privilege::iter().collect();
+    if let Err(e) = priv_service.associate(ROLE_ADMIN, &privs).await {
+        error!("Failed to associate admin privileges: {}", e);
+        panic!("Failed to associate admin privileges: {}", e);
+    }
+    let router = routes::build_router(ctx.clone());
 
     let addr = format!("localhost:{}", ctx.cfg.port);
     let listener = TcpListener::bind(&addr)

@@ -5,15 +5,16 @@ use crate::{
         DBPool, RepositoryManager, privileges::PrivilegesRepository, sessions::SessionsRepository,
         users::UsersRepository,
     },
-    services::ServiceResult,
+    services::{self, ServiceResult},
 };
+use chrono::{Days, Utc};
 use models::{
     api::auth::{Login, SignUp},
     db::auth::{privilege::Privilege, session::Session, user::User},
 };
 use tracing::trace;
 use utils::auth::{
-    self,
+    self, MAX_COOKIE_AGE_DAYS,
     hash::{hash_password, verify_password},
     roles::ROLE_BASIC,
 };
@@ -49,10 +50,17 @@ impl AuthService for Auth {
 
         verify_password(&login.password, &user.password)?;
 
+        let expires_at = Utc::now()
+            .checked_add_days(Days::new(MAX_COOKIE_AGE_DAYS))
+            .ok_or(services::Error::Generic(
+                "could not create expires at".to_string(),
+            ))?;
+
         let mut session = Session {
             user_id: user.id,
             token: uuid::Uuid::now_v7().to_string(),
-            ..Default::default()
+            created_at: None,
+            expires_at: Some(expires_at.naive_utc()),
         };
 
         self.repos.sessions.insert(&mut conn, &mut session).await?;
