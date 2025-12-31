@@ -3,18 +3,18 @@ use crate::{
     services::{
         ServiceManager,
         auth::{Auth, AuthService},
-        hello_world::{HelloWorld, HelloWorldService},
         privileges::{Privileges, PrivilegesService},
+        users::{Users, UsersService},
     },
 };
 
 #[derive(Clone, Debug)]
-pub struct AppState<HW = HelloWorld, AT = Auth, PS = Privileges>
+pub struct AppState<AT = Auth, PS = Privileges, US = Users>
 where
-    HW: HelloWorldService,
     AT: AuthService,
     PS: PrivilegesService,
+    US: UsersService,
 {
     pub cfg: Config,
-    pub svc: ServiceManager<HW, AT, PS>,
+    pub svc: ServiceManager<AT, PS, US>,
 }

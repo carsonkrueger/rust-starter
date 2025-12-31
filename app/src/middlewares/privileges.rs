@@ -14,11 +14,9 @@ pub async fn privileges_middleware(
     req: Request<Body>,
     next: Next,
 ) -> impl IntoResponse {
-    dbg!("required:", &privs);
-    dbg!("contains:", &ctx.privileges);
     for p in &privs {
         if !ctx.privileges.contains(p) {
-            return StatusCode::UNAUTHORIZED.into_response();
+            return StatusCode::FORBIDDEN.into_response();
         }
     }
     next.run(req).await

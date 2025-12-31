@@ -1,6 +1,7 @@
 use templr::{templ, templ_ret};
 use tw_merge::tw_merge;
 
+#[derive(Default)]
 pub struct InputProps<'a> {
     pub id: &'a str,
     pub class: &'a str,
@@ -8,19 +9,6 @@ pub struct InputProps<'a> {
     pub attrs: &'a [(&'a str, &'a str)],
     pub name: &'a str,
     pub value: &'a str,
-}
-
-impl Default for InputProps<'_> {
-    fn default() -> Self {
-        InputProps {
-            id: "",
-            class: "",
-            input_class: "",
-            attrs: &[],
-            name: "",
-            value: "",
-        }
-    }
 }
 
 pub fn input<'a>(props: InputProps<'a>) -> templ_ret!['a] {

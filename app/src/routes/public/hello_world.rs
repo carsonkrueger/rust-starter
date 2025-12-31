@@ -1,10 +1,9 @@
-use axum::{Router, extract::State, response::IntoResponse, routing::get};
+use axum::{Router, response::IntoResponse, routing::get};
 use tracing::trace;
 
 use crate::{
     context::AppState,
     routes::{NestedRouter, NestedRouterPath},
-    services::{ServiceManager, hello_world::HelloWorldService},
 };
 
 #[derive(Clone)]
@@ -20,12 +19,7 @@ impl NestedRouter<AppState> for HelloWorldRoute {
     }
 }
 
-async fn hello_world(
-    State(AppState {
-        svc: ServiceManager { hello_world, .. },
-        ..
-    }): State<AppState>,
-) -> impl IntoResponse {
+async fn hello_world() -> impl IntoResponse {
     trace!("->> hello_world");
-    hello_world.hello_world().await
+    "Hello World!"
 }

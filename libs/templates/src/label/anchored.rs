@@ -3,6 +3,7 @@ use tw_merge::{AsTailwindClass, tw_merge};
 
 use crate::label::{LabelProps, label};
 
+#[derive(Default)]
 pub struct AnchoredProps<'a> {
     pub id: &'a str,
     pub class: &'a str,
@@ -12,19 +13,9 @@ pub struct AnchoredProps<'a> {
     pub anchor: Anchor,
 }
 
-impl Default for AnchoredProps<'_> {
-    fn default() -> Self {
-        AnchoredProps {
-            id: "",
-            class: "",
-            attrs: &[],
-            label: "",
-            anchor: Anchor::Top,
-        }
-    }
-}
-
+#[derive(Default)]
 pub enum Anchor {
+    #[default]
     Top,
     Bottom,
     Left,
@@ -45,7 +36,10 @@ impl AsTailwindClass for Anchor {
 pub fn anchored<'a>(props: AnchoredProps<'a>) -> templ_ret!['a] {
     templ! {
         #use children;
-        <div class={tw_merge!("flex gap-2 w-full text-primary-foreground", &props.anchor, props.class)}>
+        <div
+            class={tw_merge!("flex gap-2 w-full text-primary-foreground", &props.anchor, props.class)}
+            {..props.attrs}
+        >
             #label(LabelProps::default()) {
                 {props.label}
             }

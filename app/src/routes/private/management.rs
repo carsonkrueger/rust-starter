@@ -1,14 +1,20 @@
 use axum::{
-    Router, extract::State, middleware::from_fn_with_state, response::IntoResponse, routing::get,
+    Router,
+    extract::{Query, State},
+    middleware::from_fn_with_state,
+    response::IntoResponse,
+    routing::get,
 };
+use models::api::query_params::QueryParams;
 use tracing::trace;
 use utils::{auth::privileges::Privilege, extensions::privileges::RequiredPrivileges};
 
 use crate::{
+    app_templates::pages::management_users,
     context::AppState,
     middlewares::privileges::privileges_middleware,
-    routes::{NestedRouter, NestedRouterPath},
-    services::{ServiceManager, hello_world::HelloWorldService},
+    routes::{NestedRouter, NestedRouterPath, RouteResult},
+    services::{ServiceManager, users::UsersService},
 };
 
 #[derive(Clone)]
@@ -32,10 +38,13 @@ impl NestedRouter<AppState> for ManagementRoute {
 
 async fn users_page(
     State(AppState {
-        svc: ServiceManager { hello_world, .. },
+        svc: ServiceManager { users, .. },
         ..
     }): State<AppState>,
-) -> impl IntoResponse {
+    Query(query_params): Query<QueryParams>,
+) -> RouteResult<impl IntoResponse> {
     trace!("->> users_page");
-    hello_world.hello_world().await
+    let query_params = query_params.sanitize();
+    let users = users.search(&query_params).await?;
+    Ok(management_users::page(users.as_slice()).into_response())
 }

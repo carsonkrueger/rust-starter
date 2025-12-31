@@ -2,7 +2,7 @@ use axum::{
     Json, Router,
     extract::State,
     http::HeaderMap,
-    response::IntoResponse,
+    response::{IntoResponse, Redirect},
     routing::{get, post},
 };
 use axum_extra::extract::{CookieJar, cookie::Cookie};
@@ -53,5 +53,6 @@ async fn login(
         token: session.token,
     }
     .into();
-    Ok(jar.add(cookie))
+
+    Ok((jar.add(cookie), Redirect::to("/management/users")))
 }

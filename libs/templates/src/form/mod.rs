@@ -1,20 +1,11 @@
 use templr::{templ, templ_ret};
 use tw_merge::tw_merge;
 
+#[derive(Default)]
 pub struct FormRowProps<'a> {
     pub id: &'a str,
     pub class: &'a str,
     pub attrs: &'a [(&'a str, &'a str)],
-}
-
-impl Default for FormRowProps<'_> {
-    fn default() -> Self {
-        FormRowProps {
-            id: "",
-            class: "",
-            attrs: &[],
-        }
-    }
 }
 
 pub fn row<'a>(props: FormRowProps<'a>) -> templ_ret!['a] {
@@ -32,20 +23,11 @@ pub fn row<'a>(props: FormRowProps<'a>) -> templ_ret!['a] {
     }
 }
 
+#[derive(Default)]
 pub struct FormColProps<'a> {
     pub id: &'a str,
     pub class: &'a str,
     pub attrs: &'a [(&'a str, &'a str)],
-}
-
-impl Default for FormColProps<'_> {
-    fn default() -> Self {
-        FormColProps {
-            id: "",
-            class: "",
-            attrs: &[],
-        }
-    }
 }
 
 pub fn col<'a>(props: FormColProps<'a>) -> templ_ret!['a] {
@@ -63,20 +45,11 @@ pub fn col<'a>(props: FormColProps<'a>) -> templ_ret!['a] {
     }
 }
 
+#[derive(Default)]
 pub struct ItemProps<'a> {
     pub id: &'a str,
     pub class: &'a str,
     pub attrs: &'a [(&'a str, &'a str)],
-}
-
-impl Default for ItemProps<'_> {
-    fn default() -> Self {
-        ItemProps {
-            id: "",
-            class: "",
-            attrs: &[],
-        }
-    }
 }
 
 pub fn item<'a>(props: ItemProps<'a>) -> templ_ret!['a] {
@@ -94,20 +67,11 @@ pub fn item<'a>(props: ItemProps<'a>) -> templ_ret!['a] {
     }
 }
 
+#[derive(Default)]
 pub struct TitleProps<'a> {
     pub id: &'a str,
     pub class: &'a str,
     pub attrs: &'a [(&'a str, &'a str)],
-}
-
-impl Default for TitleProps<'_> {
-    fn default() -> Self {
-        TitleProps {
-            id: "",
-            class: "",
-            attrs: &[],
-        }
-    }
 }
 
 pub fn title<'a>(props: TitleProps<'a>) -> templ_ret!['a] {

@@ -43,7 +43,7 @@ async fn main() {
     let pool = connection_pool(&db_cfg).await;
 
     let repos = RepositoryManager::default();
-    let svc = ServiceManager::<_, _, Privileges>::default(pool, repos);
+    let svc = ServiceManager::<_, Privileges, _>::default(pool, repos);
     let priv_service = svc.privileges.clone();
     let ctx = AppState {
         cfg: cfg.clone(),

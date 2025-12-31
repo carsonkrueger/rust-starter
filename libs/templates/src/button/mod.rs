@@ -1,35 +1,28 @@
+use strum::IntoStaticStr;
 use templr::{templ, templ_ret};
 use tw_merge::{AsTailwindClass, tw_merge};
 
+#[derive(Default)]
 pub struct ButtonProps<'a> {
     pub id: &'a str,
     pub class: &'a str,
     pub variant: Variant,
-    pub btn_type: &'a str,
+    pub btn_type: ButtonType,
     pub attrs: &'a [(&'a str, &'a str)],
 }
 
+#[derive(Default)]
 pub enum Variant {
+    #[default]
     Primary,
     Transparent,
 }
 
-impl Default for ButtonProps<'_> {
-    fn default() -> Self {
-        ButtonProps {
-            id: "",
-            class: "",
-            variant: Variant::default(),
-            btn_type: "button",
-            attrs: &[],
-        }
-    }
-}
-
-impl Default for Variant {
-    fn default() -> Self {
-        Variant::Primary
-    }
+#[derive(Default, IntoStaticStr)]
+pub enum ButtonType {
+    #[default]
+    Button,
+    Submit,
 }
 
 impl AsTailwindClass for Variant {
@@ -48,7 +41,7 @@ pub fn button<'a>(props: ButtonProps<'a>) -> templ_ret!['a] {
             #if !props.id.is_empty() {
                 id={props.id}
             }
-            type={props.btn_type}
+            type={Into::<&'static str>::into(&props.btn_type)}
             class={tw_merge!("flex justify-center items-center px-3 py-2 rounded-sm cursor-pointer hover:shadow-md hover:-translate-y-[2px] animate-all duration-300", &props.variant, &props.class)}
             {..props.attrs}
         >
