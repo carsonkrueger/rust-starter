@@ -12,6 +12,7 @@ static CACHED_ICONS: Lazy<RwLock<HashMap<String, String>>> =
 
 #[derive(Debug, Clone)]
 pub struct IconProps<'a> {
+    pub icon: Icon,
     pub size: u32,
     pub color: &'a str,
     pub fill: &'a str,
@@ -23,6 +24,7 @@ pub struct IconProps<'a> {
 impl Default for IconProps<'_> {
     fn default() -> Self {
         IconProps {
+            icon: Icon::default(),
             size: 24,
             color: "#000",
             fill: "none",
@@ -34,8 +36,8 @@ impl Default for IconProps<'_> {
 }
 
 /// Returns a function that produces a Template for an icon name
-pub fn icon<'a>(icon: Icon, props: IconProps<'a>) -> templ_ret!['a] {
-    let name = icon as u8;
+pub fn icon<'a>(props: IconProps<'a>) -> templ_ret!['a] {
+    let name = props.icon as u8;
     let cache_key = format!(
         "{name}|s:{:?}|c:{:?}|f:{:?}|sk:{:?}|sw:{:?}|cl:{:?}",
         props.size, props.color, props.fill, props.stroke, props.stroke_width, props.class
@@ -49,7 +51,7 @@ pub fn icon<'a>(icon: Icon, props: IconProps<'a>) -> templ_ret!['a] {
         }
 
         // Generate SVG
-        let svg = generate_svg(icon, &props)?;
+        let svg = generate_svg(&props)?;
 
         // Cache result
         CACHED_ICONS
@@ -62,8 +64,8 @@ pub fn icon<'a>(icon: Icon, props: IconProps<'a>) -> templ_ret!['a] {
     })
 }
 
-fn generate_svg(icon: Icon, props: &IconProps<'_>) -> Result<String, std::fmt::Error> {
-    let content: &'static str = icon.into();
+fn generate_svg(props: &IconProps<'_>) -> Result<String, std::fmt::Error> {
+    let content: &'static str = props.icon.into();
 
     let size = props.size;
     let fill = props.fill;

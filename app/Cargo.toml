@@ -25,3 +25,5 @@ tower-http = { version = "0.6.8", features = ["fs", "trace"] }
 tracing = "0.1.44"
 tracing-subscriber = { version = "0.3.22", features = ["env-filter"] }
 tower = "0.5.2"
+futures-util = "0.3.31"
+strum = { version = "0.27.2", features = ["derive"] }

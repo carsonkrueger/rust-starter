@@ -3,19 +3,18 @@ use tw_merge::tw_merge;
 
 #[derive(Default)]
 pub struct InputProps<'a> {
-    pub id: &'a str,
+    pub id: Option<&'a str>,
     pub class: &'a str,
-    pub input_class: &'a str,
     pub attrs: &'a [(&'a str, &'a str)],
     pub name: &'a str,
     pub value: &'a str,
 }
 
-pub fn input<'a>(props: InputProps<'a>) -> templ_ret!['a] {
+pub fn input<'a>(props: &'a InputProps<'a>) -> templ_ret!['a] {
     templ! {
         <input
-            #if !props.id.is_empty() {
-                id={props.id}
+            #if let Some(id) = props.id {
+                id={id}
             }
             name={props.name}
             value={props.value}
@@ -36,7 +35,7 @@ pub fn input<'a>(props: InputProps<'a>) -> templ_ret!['a] {
                 "disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50",
                 // Error/Invalid styles
                 "aria-invalid:ring-destructive/20 aria-invalid:border-destructive dark:aria-invalid:ring-destructive/40",
-                props.input_class)}
+                props.class)}
             {..props.attrs}
         />
     }

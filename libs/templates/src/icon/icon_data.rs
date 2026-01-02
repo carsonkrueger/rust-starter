@@ -1,9 +1,10 @@
 const _LUCIDE_VERSION: &'static str = "0.544.0";
 
 /// To add another SVG you can check https://lucide.dev and find the icon you'd like. Copy the name and add it to the enum then copy the svg and add it into the Into<&'static str> impl block.
-#[derive(Hash, Clone, Copy, Eq, PartialEq)]
+#[derive(Hash, Clone, Copy, Eq, PartialEq, Default, Debug)]
 #[repr(u8)]
 pub enum Icon {
+    #[default]
     Vegan,
     WifiOff,
     CircleUserRound,

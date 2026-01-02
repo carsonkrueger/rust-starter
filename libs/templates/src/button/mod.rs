@@ -4,7 +4,7 @@ use tw_merge::{AsTailwindClass, tw_merge};
 
 #[derive(Default)]
 pub struct ButtonProps<'a> {
-    pub id: &'a str,
+    pub id: Option<&'a str>,
     pub class: &'a str,
     pub variant: Variant,
     pub btn_type: ButtonType,
@@ -38,8 +38,8 @@ pub fn button<'a>(props: ButtonProps<'a>) -> templ_ret!['a] {
     templ! {
         #use children;
         <button
-            #if !props.id.is_empty() {
-                id={props.id}
+            #if let Some(id) = props.id {
+                id={id}
             }
             type={Into::<&'static str>::into(&props.btn_type)}
             class={tw_merge!("flex justify-center items-center px-3 py-2 rounded-sm cursor-pointer hover:shadow-md hover:-translate-y-[2px] animate-all duration-300", &props.variant, &props.class)}

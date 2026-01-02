@@ -5,17 +5,17 @@ pub mod anchored;
 
 #[derive(Default)]
 pub struct LabelProps<'a> {
-    pub id: &'a str,
+    pub id: Option<&'a str>,
     pub class: &'a str,
     pub attrs: &'a [(&'a str, &'a str)],
 }
 
-pub fn label<'a>(props: LabelProps<'a>) -> templ_ret!['a] {
+pub fn label<'a>(props: &'a LabelProps<'a>) -> templ_ret!['a] {
     templ! {
         #use children;
         <label
-            #if !props.id.is_empty() {
-                id={props.id}
+            #if let Some(id) = props.id {
+                id={id}
             }
             class={tw_merge!("text-sm font-medium leading-none inline-block", props.class)}
             {..props.attrs}

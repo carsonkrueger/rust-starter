@@ -19,7 +19,7 @@ pub fn main<'a>() -> templ_ret!['a] {
                             class: &"rounded-full p-2",
                             ..Default::default()
                         }) {
-                            #icon(Icon::House, IconProps{ color: "var(--primary-foreground)", ..Default::default()});
+                            #icon(IconProps{ icon: Icon::House, color: "var(--primary-foreground)", ..Default::default()});
                         }
                     </a>
                     <a href="/login">
@@ -28,7 +28,7 @@ pub fn main<'a>() -> templ_ret!['a] {
                             class: &"rounded-full p-2",
                             ..Default::default()
                         }) {
-                            #icon(Icon::CircleUserRound, IconProps{ color: "var(--primary-foreground)", ..Default::default()});
+                            #icon(IconProps{ icon: Icon::CircleUserRound, color: "var(--primary-foreground)", ..Default::default()});
                         }
                     </a>
                 </div>

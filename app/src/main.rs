@@ -17,7 +17,7 @@ use crate::{
     },
 };
 
-use utils::prelude::IntoEnumIterator;
+use strum::IntoEnumIterator;
 
 mod app_templates;
 mod context;

@@ -12,8 +12,9 @@ use axum::{
     response::{IntoResponse, Redirect},
     routing::get,
 };
+use strum::ParseError;
 use tracing::{error, info_span, warn};
-use utils::{auth, extensions::ctx, prelude::ParseError};
+use utils::{auth, extensions::ctx};
 use uuid::Uuid;
 
 use crate::{
@@ -44,6 +45,8 @@ pub enum Error {
     Ctx(#[from] ctx::CtxError),
     #[error(transparent)]
     Strum(#[from] ParseError),
+    #[error(transparent)]
+    Templr(#[from] templr::Error),
 }
 
 impl IntoResponse for Error {
@@ -63,6 +66,10 @@ impl IntoResponse for Error {
             }
             Error::Strum(e) => {
                 error!(error = %e, "strum error");
+                StatusCode::INTERNAL_SERVER_ERROR.into_response()
+            }
+            Error::Templr(e) => {
+                error!(error = %e, "templr error");
                 StatusCode::INTERNAL_SERVER_ERROR.into_response()
             }
         }

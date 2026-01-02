@@ -7,7 +7,7 @@ pub fn page<'a>(users: &'a [User]) -> templ_ret!['a] {
     templ! {
         #page_layout() {
             <div class="min-h-screen text-main flex flex-col items-center">
-                #tables::management::management_users_table("users", users);
+                #tables::management::user_management_table(users);
             </div>
         }
     }

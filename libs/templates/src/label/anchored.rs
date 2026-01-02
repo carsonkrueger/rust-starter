@@ -5,12 +5,13 @@ use crate::label::{LabelProps, label};
 
 #[derive(Default)]
 pub struct AnchoredProps<'a> {
-    pub id: &'a str,
+    pub id: Option<&'a str>,
     pub class: &'a str,
     pub attrs: &'a [(&'a str, &'a str)],
     pub label: &'a str,
     /// Where the label is anchored
     pub anchor: Anchor,
+    pub label_props: Option<&'a LabelProps<'a>>,
 }
 
 #[derive(Default)]
@@ -33,14 +34,17 @@ impl AsTailwindClass for Anchor {
     }
 }
 
-pub fn anchored<'a>(props: AnchoredProps<'a>) -> templ_ret!['a] {
+pub fn anchored<'a>(props: &'a AnchoredProps<'a>) -> templ_ret!['a] {
     templ! {
         #use children;
         <div
+            #if let Some(id) = props.id {
+                id={id}
+            }
             class={tw_merge!("flex gap-2 w-full text-primary-foreground", &props.anchor, props.class)}
             {..props.attrs}
         >
-            #label(LabelProps::default()) {
+            #label(props.label_props.unwrap_or(&LabelProps::default())) {
                 {props.label}
             }
             #children;
