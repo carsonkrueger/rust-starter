@@ -23,7 +23,7 @@ pub fn intersect_row<'a>(props: &'a IntersectRowProps<'a>) -> templ_ret!['a] {
                 colspan={col_span}
             }
             class={tw_merge!("w-full caption-bottom text-sm", props.class)}
-            data-on-intersect={format!("@{}('{}')", props.method.clone().unwrap_or_default(), props.endpoint)}
+            data-on-intersect={format!("@{}('{}', {{ filterSignals: {{ exclude: '*' }} }})", props.method.clone().unwrap_or_default().to_string().to_lowercase(), props.endpoint)}
             {..props.attrs}
         >
             #children;

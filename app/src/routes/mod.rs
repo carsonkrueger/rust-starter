@@ -1,3 +1,5 @@
+use core::fmt;
+
 use crate::{
     middlewares::trace::trace_middleware,
     routes::{
@@ -47,6 +49,8 @@ pub enum Error {
     Strum(#[from] ParseError),
     #[error(transparent)]
     Templr(#[from] templr::Error),
+    #[error(transparent)]
+    Fmt(#[from] fmt::Error),
 }
 
 impl IntoResponse for Error {
@@ -70,6 +74,10 @@ impl IntoResponse for Error {
             }
             Error::Templr(e) => {
                 error!(error = %e, "templr error");
+                StatusCode::INTERNAL_SERVER_ERROR.into_response()
+            }
+            Error::Fmt(e) => {
+                error!(error = %e, "generic error");
                 StatusCode::INTERNAL_SERVER_ERROR.into_response()
             }
         }

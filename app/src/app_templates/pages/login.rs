@@ -12,7 +12,7 @@ pub fn page<'a>() -> templ_ret!['a] {
     templ! {
         #page_layout() {
             <div class="px-8 min-h-screen text-main flex flex-col items-center justify-center">
-                <form class="max-w-96 w-full">
+                <form id="login" class="max-w-96 w-full">
                     #col(&FormColProps::default()) {
                         #title(&TitleProps::default()) {
                             Login
@@ -23,7 +23,6 @@ pub fn page<'a>() -> templ_ret!['a] {
                         }) {
                             #input(&InputProps{
                                 name: "email",
-                                attrs: &[("data-bind:email", "")],
                                 ..Default::default()
                             });
                         }
@@ -33,7 +32,6 @@ pub fn page<'a>() -> templ_ret!['a] {
                         }) {
                             #input(&InputProps{
                                 name: "password",
-                                attrs: &[("data-bind:password", "")],
                                 ..Default::default()
                             });
                         }
@@ -42,7 +40,8 @@ pub fn page<'a>() -> templ_ret!['a] {
                                 <span class="text-primary-foreground text-sm hover:underline cursor-pointer">Sign Up</span>
                             </a>
                             #button(ButtonProps {
-                                attrs: &[("data-on:click", "@post('/login', {contentType: 'json'})")],
+                                attrs: &[("data-on:click", "@post('/login', {contentType: 'form'})")],
+                                btn_type: templates::button::ButtonType::Submit,
                                 ..Default::default()
                             }) {
                                 Login

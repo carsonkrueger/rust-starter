@@ -23,7 +23,6 @@ pub fn page<'a>() -> templ_ret!['a] {
                         }) {
                             #input(&InputProps{
                                 name: "email",
-                                attrs: &[("data-bind:email", "")],
                                 ..Default::default()
                             });
                         }
@@ -34,7 +33,6 @@ pub fn page<'a>() -> templ_ret!['a] {
                             }) {
                                 #input(&InputProps{
                                     name: "first_name",
-                                    attrs: &[("data-bind:first_name", "")],
                                     ..Default::default()
                                 });
                             }
@@ -44,7 +42,6 @@ pub fn page<'a>() -> templ_ret!['a] {
                             }) {
                                 #input(&InputProps{
                                     name: "last_name",
-                                    attrs: &[("data-bind:last_name", "")],
                                     ..Default::default()
                                 });
                             }
@@ -55,7 +52,6 @@ pub fn page<'a>() -> templ_ret!['a] {
                         }) {
                             #input(&InputProps{
                                 name: "password",
-                                attrs: &[("data-bind:password", "")],
                                 ..Default::default()
                             });
                         }
@@ -73,7 +69,8 @@ pub fn page<'a>() -> templ_ret!['a] {
                                 </a>
                             </p>
                             #button(ButtonProps {
-                                attrs: &[("data-on:click", "@post('/sign_up', {contentType: 'json'})")],
+                                attrs: &[("data-on:click", "@post('/sign_up', {contentType: 'form'})")],
+                                btn_type: templates::button::ButtonType::Submit,
                                 ..Default::default()
                             }) {
                                 Sign Up

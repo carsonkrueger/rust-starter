@@ -1,5 +1,3 @@
-use std::{convert::Infallible, thread::sleep, time::Duration};
-
 use axum::{
     Router, debug_handler,
     extract::{Query, State},
@@ -17,7 +15,7 @@ use crate::{
     app_templates::{pages::management_users, tables},
     context::{
         AppState,
-        datastar::{DatastarElements, DatastarEvent, DatastarMode},
+        datastar::{DatastarElement, DatastarEvent},
     },
     middlewares::privileges::privileges_middleware,
     routes::{self, NestedRouter, NestedRouterPath, RouteResult},
@@ -75,18 +73,18 @@ async fn users_rows(
     trace!("->> users_rows");
     let users = users.search(&query_params).await?;
 
-    let event = {
-        let mut event = Event::default()
-            .event::<&'static str>(DatastarEvent::DatastarPatchElements.into())
-            .data::<&'static str>(DatastarMode::Before.into());
-        for u in &users {
-            event = event.data(tables::management::user_row(u).render(&())?);
-        }
-        Ok(event)
-    };
+    let res = users.into_iter().fold("".to_string(), |a, u| {
+        let r = tables::management::user_row(&u)
+            .render(&())
+            .unwrap_or("".to_string());
+        a + &r
+    });
 
-    sleep(Duration::from_secs(1));
+    let el = DatastarElement::redirect("/management/users")? + res.as_str();
+    let event = Event::default()
+        .event::<&'static str>(DatastarEvent::DatastarPatchElements.into())
+        .data::<String>(el.into());
+    let stream = stream::once(async move { Ok(event) });
 
-    let stream = stream::once(async move { event });
     Ok(Sse::new(stream))
 }

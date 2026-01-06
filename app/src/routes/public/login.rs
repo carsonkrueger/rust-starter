@@ -1,19 +1,23 @@
 use axum::{
-    Json, Router,
+    Form, Router,
     extract::State,
     http::HeaderMap,
-    response::{IntoResponse, Redirect},
+    response::{IntoResponse, Sse, sse::Event},
     routing::{get, post},
 };
 use axum_extra::extract::{CookieJar, cookie::Cookie};
+use futures_util::stream;
 use models::api::auth::Login;
 use tracing::trace;
 use utils::auth::AuthParts;
 
 use crate::{
     app_templates::{self, Layout, pages},
-    context::AppState,
-    routes::{NestedRouter, NestedRouterPath, RouteResult},
+    context::{
+        AppState,
+        datastar::{DatastarElement, DatastarMode},
+    },
+    routes::{self, NestedRouter, NestedRouterPath, RouteResult},
     services::{ServiceManager, auth::AuthService},
 };
 
@@ -44,7 +48,7 @@ async fn login(
         ..
     }): State<AppState>,
     jar: CookieJar,
-    Json(login): Json<Login>,
+    Form(login): Form<Login>,
 ) -> RouteResult<impl IntoResponse> {
     trace!("->> login");
     let (user, session) = auth.login(login).await?;
@@ -54,5 +58,11 @@ async fn login(
     }
     .into();
 
-    Ok((jar.add(cookie), Redirect::to("/management/users")))
+    let el = DatastarElement::redirect("/management/users")?;
+    let stream = stream::once(async move {
+        Ok::<Event, routes::Error>(el.event_with_mode("#login", DatastarMode::After))
+    });
+    let sse = Sse::new(stream);
+
+    Ok((jar.add(cookie), sse))
 }
