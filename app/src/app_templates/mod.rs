@@ -32,7 +32,7 @@ pub enum Layout {
 }
 
 pub fn render<'a>(
-    f: Box<dyn Template + Send>,
+    f: Box<dyn Template + Send + 'a>,
     layout: Layout,
     headers: &HeaderMap,
 ) -> Response<Body> {

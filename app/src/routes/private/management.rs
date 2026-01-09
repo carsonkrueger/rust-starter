@@ -1,24 +1,22 @@
 use axum::{
     Router, debug_handler,
     extract::{Query, State},
+    http::HeaderMap,
     middleware::from_fn_with_state,
-    response::{IntoResponse, Sse, sse::Event},
+    response::IntoResponse,
     routing::get,
 };
-use futures_util::{Stream, stream};
+use datastar::elements::DatastarElement;
 use models::api::query_params::QueryParams;
 use templr::Template;
 use tracing::trace;
 use utils::{auth::privileges::Privilege, extensions::privileges::RequiredPrivileges};
 
 use crate::{
-    app_templates::{pages::management_users, tables},
-    context::{
-        AppState,
-        datastar::{DatastarElement, DatastarEvent},
-    },
+    app_templates::{Layout, pages::management_users, render, tables},
+    context::AppState,
     middlewares::privileges::privileges_middleware,
-    routes::{self, NestedRouter, NestedRouterPath, RouteResult},
+    routes::{NestedRouter, NestedRouterPath, RouteResult},
     services::{ServiceManager, users::UsersService},
 };
 
@@ -55,11 +53,13 @@ async fn users_page(
         ..
     }): State<AppState>,
     Query(query_params): Query<QueryParams>,
+    header_map: HeaderMap,
 ) -> RouteResult<impl IntoResponse> {
     trace!("->> users_page");
     let query_params = query_params.sanitize();
     let users = users.search(&query_params).await?;
-    Ok(management_users::page(users.as_slice()).into_response())
+    let page = management_users::page(users.as_slice());
+    Ok(render(Box::new(page), Layout::Main, &header_map))
 }
 
 #[debug_handler]
@@ -69,7 +69,7 @@ async fn users_rows(
         ..
     }): State<AppState>,
     Query(query_params): Query<QueryParams>,
-) -> RouteResult<Sse<impl Stream<Item = Result<Event, routes::Error>>>> {
+) -> RouteResult<impl IntoResponse> {
     trace!("->> users_rows");
     let users = users.search(&query_params).await?;
 
@@ -80,11 +80,8 @@ async fn users_rows(
         a + &r
     });
 
-    let el = DatastarElement::redirect("/management/users")? + res.as_str();
-    let event = Event::default()
-        .event::<&'static str>(DatastarEvent::DatastarPatchElements.into())
-        .data::<String>(el.into());
-    let stream = stream::once(async move { Ok(event) });
+    let el = DatastarElement::redirect_element("/management/users")? + res.as_str();
+    let sse = datastar::patch_elements().elements(el).axum_stream();
 
-    Ok(Sse::new(stream))
+    Ok(sse)
 }

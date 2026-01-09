@@ -1,0 +1,10 @@
+[package]
+name = "datastar"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+axum = "0.8.8"
+futures-core = "0.3.31"
+futures-util = "0.3.31"
+strum = { version = "0.27.2", features = ["derive"] }

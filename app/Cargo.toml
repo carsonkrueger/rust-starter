@@ -17,6 +17,7 @@ bb8 = "0.9.1"
 models = { path = "../libs/models" }
 schemas = { path = "../libs/schemas" }
 utils = { path = "../libs/utils" }
+datastar = { path = "../libs/datastar" }
 uuid = { version = "1.19.0", features = ["v7"] }
 serde = { version = "1.0.228", features = ["derive"] }
 templr = { version = "0.2.5", features = ["axum"] }

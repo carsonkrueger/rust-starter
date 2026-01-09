@@ -8,8 +8,6 @@ use crate::{
     },
 };
 
-pub mod datastar;
-
 #[derive(Clone, Debug)]
 pub struct AppState<AT = Auth, PS = Privileges, US = Users>
 where

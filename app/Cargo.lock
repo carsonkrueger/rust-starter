@@ -35,6 +35,7 @@ dependencies = [
  "axum-extra",
  "bb8",
  "chrono",
+ "datastar",
  "diesel",
  "diesel-async",
  "dotenvy",
@@ -347,6 +348,16 @@ dependencies = [
  "darling_core",
  "quote",
  "syn",
+]
+
+[[package]]
+name = "datastar"
+version = "0.1.0"
+dependencies = [
+ "axum",
+ "futures-core",
+ "futures-util",
+ "strum",
 ]
 
 [[package]]
