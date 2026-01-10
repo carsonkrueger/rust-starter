@@ -33,3 +33,4 @@ tmp/
 node_modules
 
 .env
+index.css

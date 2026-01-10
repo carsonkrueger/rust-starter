@@ -4,7 +4,7 @@ use crate::app_templates::pages::page_layout;
 use templates::{
     button::{ButtonProps, button},
     form::{FormColProps, FormRowProps, TitleProps, col, row, title},
-    input::{InputProps, input},
+    input::{InputProps, InputType, input},
     label::anchored::{AnchoredProps, anchored},
 };
 
@@ -52,6 +52,7 @@ pub fn page<'a>() -> templ_ret!['a] {
                         }) {
                             #input(&InputProps{
                                 name: "password",
+                                input_type: InputType::Password,
                                 ..Default::default()
                             });
                         }
@@ -59,7 +60,10 @@ pub fn page<'a>() -> templ_ret!['a] {
                             label: "Confirm Password",
                             ..AnchoredProps::default()
                         }) {
-                            #input(&InputProps::default());
+                            #input(&InputProps{
+                                input_type: InputType::Password,
+                                ..Default::default()
+                            });
                         }
                         <div class="w-full flex justify-between items-end">
                             <p class="text-sm text-primary-foreground">

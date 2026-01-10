@@ -1,4 +1,3 @@
-use core::fmt;
 use std::{fmt::Display, ops::Add};
 
 pub struct DatastarElement(pub String);
@@ -17,15 +16,6 @@ impl Display for DatastarElement {
             f.write_str("\n")?;
         }
         Ok(())
-    }
-}
-
-impl DatastarElement {
-    pub fn redirect_element(to: &str) -> Result<Self, fmt::Error> {
-        Ok(Self(format!(
-            "<script>window.location.href = \"{}\"</script>",
-            to
-        )))
     }
 }
 

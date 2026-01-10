@@ -6,7 +6,6 @@ use axum::{
     response::IntoResponse,
     routing::get,
 };
-use datastar::elements::DatastarElement;
 use models::api::query_params::QueryParams;
 use templr::Template;
 use tracing::trace;
@@ -73,15 +72,14 @@ async fn users_rows(
     trace!("->> users_rows");
     let users = users.search(&query_params).await?;
 
-    let res = users.into_iter().fold("".to_string(), |a, u| {
+    let rows = users.into_iter().fold("".to_string(), |a, u| {
         let r = tables::management::user_row(&u)
             .render(&())
             .unwrap_or("".to_string());
         a + &r
     });
 
-    let el = DatastarElement::redirect_element("/management/users")? + res.as_str();
-    let sse = datastar::patch_elements().elements(el).axum_stream();
+    let sse = datastar::patch_elements().elements(rows).axum_stream();
 
     Ok(sse)
 }

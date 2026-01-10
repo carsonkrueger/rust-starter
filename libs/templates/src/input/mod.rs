@@ -1,3 +1,4 @@
+use strum::IntoStaticStr;
 use templr::{templ, templ_ret};
 use tw_merge::tw_merge;
 
@@ -5,9 +6,26 @@ use tw_merge::tw_merge;
 pub struct InputProps<'a> {
     pub id: Option<&'a str>,
     pub class: &'a str,
+    pub input_type: InputType,
     pub attrs: &'a [(&'a str, &'a str)],
     pub name: &'a str,
     pub value: &'a str,
+}
+
+#[derive(IntoStaticStr, Default)]
+pub enum InputType {
+    #[default]
+    Text,
+    Password,
+    Email,
+    Number,
+}
+
+impl ToString for InputType {
+    fn to_string(&self) -> String {
+        let str: &str = self.into();
+        str.to_string()
+    }
 }
 
 pub fn input<'a>(props: &'a InputProps<'a>) -> templ_ret!['a] {
@@ -16,6 +34,7 @@ pub fn input<'a>(props: &'a InputProps<'a>) -> templ_ret!['a] {
             #if let Some(id) = props.id {
                 id={id}
             }
+            type={props.input_type.to_string()}
             name={props.name}
             value={props.value}
             class={tw_merge!(
