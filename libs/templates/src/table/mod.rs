@@ -1,8 +1,6 @@
 use templr::{templ, templ_ret};
 use tw_merge::tw_merge;
 
-pub mod infinite_scroll;
-
 #[derive(Default)]
 pub struct TableProps<'a> {
     pub id: Option<&'a str>,
@@ -127,7 +125,7 @@ pub fn td<'a>(props: &'a TdProps<'a>) -> templ_ret!['a] {
             #if let Some(id) = props.id {
                 id={id}
             }
-            class={tw_merge!("p-2 align-middle", props.class)}
+            class={tw_merge!("p-5 align-middle", props.class)}
             {..props.attrs}
         >
             #children;

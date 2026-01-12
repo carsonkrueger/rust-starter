@@ -1,6 +1,11 @@
 use chrono::NaiveDateTime;
+use datastar::templates::table::IntoTableData;
 use diesel::prelude::*;
 use serde::Serialize;
+use templates::table::{TdProps, ThProps, td, th};
+use templr::{templ, templ_ret};
+
+// use datastar
 
 #[derive(Queryable, Selectable, Insertable, Clone, Debug, Serialize)]
 #[diesel(table_name = schemas::auth::users)]
@@ -34,6 +39,51 @@ impl Default for User {
             role_id: 0,
             created_at: None,
             updated_at: None,
+        }
+    }
+}
+
+impl IntoTableData for User {
+    const ENDPOINT: &'static str = "/management/users/rows";
+    const TABLE_ID: &'static str = "usersTable";
+    const TABLE_BODY_ID: &'static str = "usersTableBody";
+
+    fn thead_row<'a>() -> templ_ret!['a] {
+        templ! {
+            #th(&ThProps::default()) {
+                Email
+            }
+            #th(&ThProps::default()) {
+                Phone
+            }
+            #th(&ThProps::default()) {
+                First Name
+            }
+            #th(&ThProps::default()) {
+                Last Name
+            }
+            #th(&ThProps::default()) {
+                Role
+            }
+        }
+    }
+    fn table_data<'a>(&'a self) -> templ_ret!['a] {
+        templ! {
+            #td(&TdProps::default()) {
+                {self.email}
+            }
+            #td(&TdProps::default()) {
+                {self.phone.clone().unwrap_or_default()}
+            }
+            #td(&TdProps::default()) {
+                {self.first_name}
+            }
+            #td(&TdProps::default()) {
+                {self.last_name}
+            }
+            #td(&TdProps::default()) {
+                {self.role_id}
+            }
         }
     }
 }

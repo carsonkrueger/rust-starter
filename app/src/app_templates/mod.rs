@@ -6,7 +6,6 @@ use utils::datastar;
 
 pub mod layouts;
 pub mod pages;
-pub mod tables;
 
 pub fn index<'a>() -> templ_ret!['a] {
     templ! {

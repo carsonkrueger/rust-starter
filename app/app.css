@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @source "./src/**/*.{rs}";
 @source "../libs/templates/src/**/*.{rs}";
+@source "../libs/datastar/src/templates/**/*.{rs}";
 
 :root {
     --background: oklch(1 0 0);

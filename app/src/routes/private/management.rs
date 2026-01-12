@@ -1,18 +1,17 @@
 use axum::{
-    Router, debug_handler,
+    Router,
     extract::{Query, State},
     http::HeaderMap,
     middleware::from_fn_with_state,
     response::IntoResponse,
     routing::get,
 };
-use models::api::query_params::QueryParams;
-use templr::Template;
+use datastar::templates::table::{search_params::DatastarSearchParams, table_patch_stream};
 use tracing::trace;
 use utils::{auth::privileges::Privilege, extensions::privileges::RequiredPrivileges};
 
 use crate::{
-    app_templates::{Layout, pages::management_users, render, tables},
+    app_templates::{Layout, pages::management_users, render},
     context::AppState,
     middlewares::privileges::privileges_middleware,
     routes::{NestedRouter, NestedRouterPath, RouteResult},
@@ -46,40 +45,23 @@ impl NestedRouter<AppState> for ManagementRoute {
     }
 }
 
-async fn users_page(
-    State(AppState {
-        svc: ServiceManager { users, .. },
-        ..
-    }): State<AppState>,
-    Query(query_params): Query<QueryParams>,
-    header_map: HeaderMap,
-) -> RouteResult<impl IntoResponse> {
+async fn users_page(header_map: HeaderMap) -> RouteResult<impl IntoResponse> {
     trace!("->> users_page");
-    let query_params = query_params.sanitize();
-    let users = users.search(&query_params).await?;
-    let page = management_users::page(users.as_slice());
+    let page = management_users::page();
     Ok(render(Box::new(page), Layout::Main, &header_map))
 }
 
-#[debug_handler]
 async fn users_rows(
     State(AppState {
         svc: ServiceManager { users, .. },
         ..
     }): State<AppState>,
-    Query(query_params): Query<QueryParams>,
+    Query(DatastarSearchParams {
+        data: search_params,
+    }): Query<DatastarSearchParams>,
 ) -> RouteResult<impl IntoResponse> {
     trace!("->> users_rows");
-    let users = users.search(&query_params).await?;
-
-    let rows = users.into_iter().fold("".to_string(), |a, u| {
-        let r = tables::management::user_row(&u)
-            .render(&())
-            .unwrap_or("".to_string());
-        a + &r
-    });
-
-    let sse = datastar::patch_elements().elements(rows).axum_stream();
-
-    Ok(sse)
+    let users = users.search(search_params.clone()).await?;
+    let stream = table_patch_stream(&users, search_params)?;
+    Ok(stream)
 }

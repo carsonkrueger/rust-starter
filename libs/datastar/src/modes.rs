@@ -2,9 +2,10 @@ use std::fmt::Display;
 
 use strum::IntoStaticStr;
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash, IntoStaticStr)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, IntoStaticStr, Default)]
 #[strum(serialize_all = "lowercase")]
 pub enum DatastarMode {
+    #[default]
     Outer,
     Inner,
     Replace,

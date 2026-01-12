@@ -2,7 +2,7 @@ use crate::repositories::DbConn;
 use diesel::SelectableHelper;
 use diesel::prelude::*;
 use diesel_async::RunQueryDsl;
-use models::api::query_params::QueryParams;
+use models::api::search_params::SearchParams;
 use models::db::auth::user::User;
 use schemas::auth::users;
 use tracing::trace;
@@ -15,7 +15,7 @@ pub trait UsersRepository {
     async fn insert(&self, db: &mut DbConn, user: &mut User) -> RepositoryResult<()>;
     async fn get_one(&self, db: &mut DbConn, pk: i64) -> RepositoryResult<User>;
     async fn get_by_email(&self, db: &mut DbConn, email: &str) -> RepositoryResult<User>;
-    async fn index(&self, db: &mut DbConn, params: &QueryParams) -> RepositoryResult<Vec<User>>;
+    async fn index(&self, db: &mut DbConn, params: &SearchParams) -> RepositoryResult<Vec<User>>;
 }
 
 #[derive(Debug)]
@@ -45,10 +45,10 @@ impl UsersRepository for Users {
             .first(db)
             .await?)
     }
-    async fn index(&self, db: &mut DbConn, params: &QueryParams) -> RepositoryResult<Vec<User>> {
+    async fn index(&self, db: &mut DbConn, params: &SearchParams) -> RepositoryResult<Vec<User>> {
         trace!("->> index");
         let mut query = users::table
-            .offset(((params.page - 1) * params.limit) as i64)
+            .offset(params.offset())
             .limit(params.limit as i64)
             .into_boxed();
         if let Some(q) = &params.query

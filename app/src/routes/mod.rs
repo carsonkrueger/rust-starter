@@ -51,6 +51,8 @@ pub enum Error {
     Templr(#[from] templr::Error),
     #[error(transparent)]
     Fmt(#[from] fmt::Error),
+    #[error(transparent)]
+    Serde(#[from] serde_json::Error),
 }
 
 impl IntoResponse for Error {
@@ -78,6 +80,10 @@ impl IntoResponse for Error {
             }
             Error::Fmt(e) => {
                 error!(error = %e, "generic error");
+                StatusCode::INTERNAL_SERVER_ERROR.into_response()
+            }
+            Error::Serde(e) => {
+                error!(error = %e, "serde error");
                 StatusCode::INTERNAL_SERVER_ERROR.into_response()
             }
         }

@@ -4,12 +4,12 @@ use crate::{
     repositories::{DBPool, RepositoryManager, users::UsersRepository},
     services::ServiceResult,
 };
-use models::{api::query_params::QueryParams, db::auth::user::User};
+use models::{api::search_params::SearchParams, db::auth::user::User};
 use tracing::trace;
 
 pub trait UsersService {
     fn new(pool: DBPool, repos: Arc<RepositoryManager>) -> Self;
-    async fn search<'a>(&self, params: &QueryParams) -> ServiceResult<Vec<User>>;
+    async fn search<S: Into<SearchParams>>(&self, params: S) -> ServiceResult<Vec<User>>;
 }
 
 #[derive(Debug, Clone)]
@@ -22,10 +22,10 @@ impl UsersService for Users {
     fn new(pool: DBPool, repos: Arc<RepositoryManager>) -> Self {
         Self { pool, repos }
     }
-    async fn search<'a>(&self, params: &QueryParams) -> ServiceResult<Vec<User>> {
+    async fn search<S: Into<SearchParams>>(&self, params: S) -> ServiceResult<Vec<User>> {
         trace!("->> search");
         let mut db = self.pool.get().await?;
-        let users = self.repos.users.index(&mut db, params).await?;
+        let users = self.repos.users.index(&mut db, &params.into()).await?;
         Ok(users)
     }
 }

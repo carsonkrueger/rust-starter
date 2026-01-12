@@ -9,7 +9,7 @@ pub struct AnchoredProps<'a> {
     pub class: &'a str,
     pub attrs: &'a [(&'a str, &'a str)],
     pub label: &'a str,
-    /// Where the label is anchored
+    pub for_: Option<&'a str>,
     pub anchor: Anchor,
     pub label_props: Option<&'a LabelProps<'a>>,
 }
@@ -40,6 +40,9 @@ pub fn anchored<'a>(props: &'a AnchoredProps<'a>) -> templ_ret!['a] {
         <div
             #if let Some(id) = props.id {
                 id={id}
+            }
+            #if let Some(for_) = props.for_ {
+                for={for_}
             }
             class={tw_merge!("flex gap-2 w-full text-primary-foreground", &props.anchor, props.class)}
             {..props.attrs}

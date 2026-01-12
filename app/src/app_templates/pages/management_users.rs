@@ -1,13 +1,14 @@
+use datastar::templates::table::DatastarTableProps;
 use models::db::auth::user::User;
 use templr::{templ, templ_ret};
 
-use crate::app_templates::{pages::page_layout, tables};
+use crate::app_templates::pages::page_layout;
 
-pub fn page<'a>(users: &'a [User]) -> templ_ret!['a] {
+pub fn page<'a>() -> templ_ret!['a] {
     templ! {
         #page_layout() {
             <div class="min-h-screen text-main flex flex-col items-center">
-                #tables::management::user_management_table(users);
+                #datastar::templates::table::datastar_table::<User>(&DatastarTableProps::default());
             </div>
         }
     }
