@@ -49,7 +49,12 @@ pub fn datastar_table<'a, TD: IntoTableData>(_props: &'a DatastarTableProps) -> 
                     ..Default::default()
                 }) {
                     #input::input(&InputProps{
-                        attrs: &[("data-bind", "query"), ("data-on:input__debounce.300ms", &format!("@get('{}')", TD::ENDPOINT)), ("data-on:input", "$page = 1"), ("data-indicator", &indicator::<TD>())],
+                        attrs: &[
+                            ("data-bind", "query"),
+                            ("data-on:input__debounce.300ms", &format!("@get('{}')", TD::ENDPOINT)),
+                            ("data-on:input", "$page = 1"),
+                            ("data-indicator", &indicator::<TD>())
+                        ],
                         ..Default::default()
                     });
                 }
@@ -58,8 +63,13 @@ pub fn datastar_table<'a, TD: IntoTableData>(_props: &'a DatastarTableProps) -> 
                 id: Some(TD::TABLE_ID),
                 ..Default::default()
             }) {
-                #thead(&THeadProps::default()) {
-                    #TD::thead_row();
+                #thead(&THeadProps{
+                    class: "",
+                    ..Default::default()
+                }) {
+                    #row(&RowProps::default()) {
+                        #TD::thead_row();
+                    }
                 }
                 #tbody(&TBodyProps{
                     id: Some(TD::TABLE_BODY_ID),

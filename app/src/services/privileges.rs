@@ -1,13 +1,13 @@
 use std::sync::Arc;
 
 use diesel_async::{AsyncConnection, scoped_futures::ScopedFutureExt};
-use models::db::auth::role_privilege::RolePrivilege;
+use models::db::auth::{role::Role, role_privilege::RolePrivilege};
 use tracing::trace;
 use utils::auth::privileges::Privilege;
 
 use crate::{
     repositories::{
-        self, DBPool, RepositoryManager, privileges::PrivilegesRepository,
+        self, DBPool, RepositoryManager, privileges::PrivilegesRepository, roles::RolesRepository,
         roles_privileges::RolesPrivilegesRepository,
     },
     services::ServiceResult,
@@ -20,6 +20,7 @@ pub trait PrivilegesService {
         role_id: i16,
         privileges: &[Privilege],
     ) -> ServiceResult<Vec<RolePrivilege>>;
+    async fn list_roles(&self) -> ServiceResult<Vec<Role>>;
 }
 
 #[derive(Debug, Clone)]
@@ -81,5 +82,10 @@ impl PrivilegesService for Privileges {
             .await?;
 
         Ok(role_privileges)
+    }
+    async fn list_roles(&self) -> ServiceResult<Vec<Role>> {
+        let mut db = self.pool.get().await?;
+        let roles = self.repos.roles.list(&mut db).await?;
+        Ok(roles)
     }
 }

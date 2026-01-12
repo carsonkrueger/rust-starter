@@ -2,11 +2,13 @@ use axum::{
     Form, Router,
     extract::State,
     http::HeaderMap,
-    response::{IntoResponse, Redirect},
+    response::IntoResponse,
     routing::{get, post},
 };
 use axum_extra::extract::CookieJar;
+use datastar::{modes::DatastarMode, templates::redirect};
 use models::api::auth::Login;
+use templr::Template;
 use tracing::trace;
 use utils::auth::AuthParts;
 
@@ -53,5 +55,11 @@ async fn login(
         token: session.token,
     };
 
-    Ok((jar.add(cookie), Redirect::to("/management/users")))
+    let redirect = redirect::redirect_replace("/management/users").render(&())?;
+    let stream = datastar::patch_elements()
+        .selector("body".to_string())
+        .mode(DatastarMode::Prepend)
+        .elements(redirect)
+        .axum_stream();
+    Ok((jar.add(cookie), stream))
 }

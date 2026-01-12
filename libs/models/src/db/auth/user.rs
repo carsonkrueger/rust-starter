@@ -5,8 +5,6 @@ use serde::Serialize;
 use templates::table::{TdProps, ThProps, td, th};
 use templr::{templ, templ_ret};
 
-// use datastar
-
 #[derive(Queryable, Selectable, Insertable, Clone, Debug, Serialize)]
 #[diesel(table_name = schemas::auth::users)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
@@ -47,14 +45,13 @@ impl IntoTableData for User {
     const ENDPOINT: &'static str = "/management/users/rows";
     const TABLE_ID: &'static str = "usersTable";
     const TABLE_BODY_ID: &'static str = "usersTableBody";
-
     fn thead_row<'a>() -> templ_ret!['a] {
         templ! {
             #th(&ThProps::default()) {
-                Email
+                ID
             }
             #th(&ThProps::default()) {
-                Phone
+                Email
             }
             #th(&ThProps::default()) {
                 First Name
@@ -70,10 +67,10 @@ impl IntoTableData for User {
     fn table_data<'a>(&'a self) -> templ_ret!['a] {
         templ! {
             #td(&TdProps::default()) {
-                {self.email}
+                {self.id}
             }
             #td(&TdProps::default()) {
-                {self.phone.clone().unwrap_or_default()}
+                {self.email}
             }
             #td(&TdProps::default()) {
                 {self.first_name}

@@ -15,7 +15,7 @@ use crate::{
     context::AppState,
     middlewares::privileges::privileges_middleware,
     routes::{NestedRouter, NestedRouterPath, RouteResult},
-    services::{ServiceManager, users::UsersService},
+    services::{ServiceManager, privileges::PrivilegesService, users::UsersService},
 };
 
 #[derive(Clone)]
@@ -53,7 +53,9 @@ async fn users_page(header_map: HeaderMap) -> RouteResult<impl IntoResponse> {
 
 async fn users_rows(
     State(AppState {
-        svc: ServiceManager { users, .. },
+        svc: ServiceManager {
+            users, privileges, ..
+        },
         ..
     }): State<AppState>,
     Query(DatastarSearchParams {
@@ -62,6 +64,7 @@ async fn users_rows(
 ) -> RouteResult<impl IntoResponse> {
     trace!("->> users_rows");
     let users = users.search(search_params.clone()).await?;
+    let roles = privileges.list_roles().await?;
     let stream = table_patch_stream(&users, search_params)?;
     Ok(stream)
 }
