@@ -1,9 +1,9 @@
 use std::sync::Arc;
 
 use diesel_async::{AsyncConnection, scoped_futures::ScopedFutureExt};
-use models::db::auth::{role::Role, role_privilege::RolePrivilege};
+use models::db::auth::role_privilege::{RolePrivilege, RolePrivilegeJoin};
 use tracing::trace;
-use utils::auth::privileges::Privilege;
+// use utils::auth::privileges::Privilege;
 
 use crate::{
     repositories::{
@@ -18,9 +18,10 @@ pub trait PrivilegesService {
     async fn associate(
         &self,
         role_id: i16,
-        privileges: &[Privilege],
+        privileges: &[utils::auth::privileges::Privilege],
     ) -> ServiceResult<Vec<RolePrivilege>>;
-    async fn list_roles(&self) -> ServiceResult<Vec<Role>>;
+    async fn list_roles_privileges(&self) -> ServiceResult<Vec<RolePrivilegeJoin>>;
+    async fn disassociate(&self, role_id: i16, privilege_id: i64) -> ServiceResult<()>;
 }
 
 #[derive(Debug, Clone)]
@@ -36,7 +37,7 @@ impl PrivilegesService for Privileges {
     async fn associate(
         &self,
         role_id: i16,
-        privileges: &[Privilege],
+        privileges: &[utils::auth::privileges::Privilege],
     ) -> ServiceResult<Vec<RolePrivilege>> {
         trace!("->> associate");
 
@@ -83,9 +84,17 @@ impl PrivilegesService for Privileges {
 
         Ok(role_privileges)
     }
-    async fn list_roles(&self) -> ServiceResult<Vec<Role>> {
+    async fn list_roles_privileges(&self) -> ServiceResult<Vec<RolePrivilegeJoin>> {
         let mut db = self.pool.get().await?;
-        let roles = self.repos.roles.list(&mut db).await?;
-        Ok(roles)
+        let roles_privileges = self.repos.roles.join_list(&mut db).await?;
+        Ok(roles_privileges)
+    }
+    async fn disassociate(&self, role_id: i16, privilege_id: i64) -> ServiceResult<()> {
+        let mut db = self.pool.get().await?;
+        self.repos
+            .roles_privileges
+            .delete(&mut db, role_id, privilege_id)
+            .await?;
+        Ok(())
     }
 }

@@ -102,9 +102,10 @@ pub trait NestedRouterPath {
 }
 
 pub fn build_router(app_state: AppState) -> Router {
-    let trace_layer = TraceLayer::new_for_http().make_span_with(|_req: &Request<Body>| {
+    let trace_layer = TraceLayer::new_for_http().make_span_with(|req: &Request<Body>| {
         info_span!(
             "http.request",
+            path = req.uri().to_string(),
             req_id = Uuid::now_v7().to_string(),
             user_id = tracing::field::Empty
         )

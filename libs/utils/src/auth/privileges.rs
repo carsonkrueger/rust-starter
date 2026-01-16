@@ -5,15 +5,14 @@ use strum::{EnumIter, EnumString, IntoStaticStr};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, IntoStaticStr, EnumString, EnumIter)]
 pub enum Privilege {
-    UserRead,
-    UserWrite,
-    UserDelete,
-    UserCreate,
-
     UsersRead,
-    UsersWrite,
+    UsersUpdate,
     UsersDelete,
     UsersCreate,
+
+    RolesPrivilegeRead,
+    RolesPrivilegeDelete,
+    RolesPrivilegeCreate,
 }
 
 impl TryFrom<privilege::Privilege> for Privilege {

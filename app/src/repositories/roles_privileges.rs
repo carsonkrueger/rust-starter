@@ -1,5 +1,5 @@
 use crate::repositories::DbConn;
-use diesel::SelectableHelper;
+use diesel::{BoolExpressionMethods, ExpressionMethods, SelectableHelper};
 use models::db::auth::role_privilege::RolePrivilege;
 
 use diesel_async::RunQueryDsl;
@@ -16,6 +16,12 @@ pub trait RolesPrivilegesRepository {
         db: &mut DbConn,
         role_privs: &[RolePrivilege],
     ) -> RepositoryResult<Vec<RolePrivilege>>;
+    async fn delete(
+        &self,
+        db: &mut DbConn,
+        role_id: i16,
+        privilege_id: i64,
+    ) -> RepositoryResult<()>;
 }
 
 #[derive(Debug)]
@@ -39,5 +45,22 @@ impl RolesPrivilegesRepository for RolesPrivileges {
             .get_results(db)
             .await?;
         Ok(res)
+    }
+    async fn delete(
+        &self,
+        db: &mut DbConn,
+        role_id: i16,
+        privilege_id: i64,
+    ) -> RepositoryResult<()> {
+        trace!("->> delete");
+        diesel::delete(roles_privileges::table)
+            .filter(
+                roles_privileges::role_id
+                    .eq(role_id)
+                    .and(roles_privileges::privilege_id.eq(privilege_id)),
+            )
+            .execute(db)
+            .await?;
+        Ok(())
     }
 }

@@ -2,6 +2,7 @@ use templr::{templ, templ_ret};
 
 pub mod home;
 pub mod login;
+pub mod management_roles_privileges;
 pub mod management_users;
 pub mod sign_up;
 

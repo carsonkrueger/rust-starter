@@ -17,11 +17,8 @@ where
         struct Raw {
             datastar: String,
         }
-
         let raw = Raw::deserialize(deserializer)?;
-
         let data = serde_json::from_str(&raw.datastar).map_err(de::Error::custom)?;
-
         Ok(Self { data })
     }
 }
