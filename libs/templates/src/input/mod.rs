@@ -2,7 +2,7 @@ use strum::IntoStaticStr;
 use templr::{templ, templ_ret};
 use tw_merge::tw_merge;
 
-#[derive(Default)]
+#[derive(Default, Copy, Clone)]
 pub struct InputProps<'a> {
     pub id: Option<&'a str>,
     pub class: &'a str,
@@ -12,7 +12,7 @@ pub struct InputProps<'a> {
     pub value: &'a str,
 }
 
-#[derive(IntoStaticStr, Default)]
+#[derive(IntoStaticStr, Default, Copy, Clone)]
 pub enum InputType {
     #[default]
     Text,
@@ -28,7 +28,7 @@ impl ToString for InputType {
     }
 }
 
-pub fn input<'a>(props: &'a InputProps<'a>) -> templ_ret!['a] {
+pub fn input<'a>(props: InputProps<'a>) -> templ_ret!['a] {
     templ! {
         <input
             #if let Some(id) = props.id {

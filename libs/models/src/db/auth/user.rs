@@ -47,38 +47,38 @@ impl IntoTableData for User {
     const TABLE_BODY_ID: &'static str = "usersTableBody";
     fn thead_row<'a>() -> templ_ret!['a] {
         templ! {
-            #th(&ThProps::default()) {
+            #th(ThProps::default()) {
                 ID
             }
-            #th(&ThProps::default()) {
+            #th(ThProps::default()) {
                 Email
             }
-            #th(&ThProps::default()) {
+            #th(ThProps::default()) {
                 First Name
             }
-            #th(&ThProps::default()) {
+            #th(ThProps::default()) {
                 Last Name
             }
-            #th(&ThProps::default()) {
+            #th(ThProps::default()) {
                 Role
             }
         }
     }
     fn table_data<'a>(&'a self) -> templ_ret!['a] {
         templ! {
-            #td(&TdProps::default()) {
+            #td(TdProps::default()) {
                 {self.id}
             }
-            #td(&TdProps::default()) {
+            #td(TdProps::default()) {
                 {self.email}
             }
-            #td(&TdProps::default()) {
+            #td(TdProps::default()) {
                 {self.first_name}
             }
-            #td(&TdProps::default()) {
+            #td(TdProps::default()) {
                 {self.last_name}
             }
-            #td(&TdProps::default()) {
+            #td(TdProps::default()) {
                 {self.role_id}
             }
         }

@@ -8,7 +8,7 @@ use axum::{
 };
 use datastar::templates::table::{search_params::DatastarSearchParams, table_patch_stream};
 use tracing::trace;
-use utils::{auth::privileges::Privilege, extensions::privileges::RequiredPrivileges};
+use utils::auth::privileges::Privilege;
 
 use crate::{
     app_templates::{
@@ -35,38 +35,38 @@ impl NestedRouter<AppState> for ManagementRoute {
             .route(
                 "/users",
                 get(users_page).route_layer(from_fn_with_state(
-                    RequiredPrivileges(vec![Privilege::UsersRead, Privilege::UsersDelete]),
+                    vec![Privilege::UsersRead, Privilege::UsersDelete],
                     privileges_middleware,
                 )),
             )
             .route(
                 "/users/rows",
                 get(users_rows).route_layer(from_fn_with_state(
-                    RequiredPrivileges(vec![Privilege::UsersRead]),
+                    vec![Privilege::UsersRead],
                     privileges_middleware,
                 )),
             )
             .route(
                 "/roles_privileges",
                 get(roles_privileges_page).route_layer(from_fn_with_state(
-                    RequiredPrivileges(vec![
+                    vec![
                         Privilege::RolesPrivilegeRead,
                         Privilege::RolesPrivilegeDelete,
-                    ]),
+                    ],
                     privileges_middleware,
                 )),
             )
             .route(
                 "/roles_privileges/rows",
                 get(roles_privileges_rows).route_layer(from_fn_with_state(
-                    RequiredPrivileges(vec![Privilege::RolesPrivilegeCreate]),
+                    vec![Privilege::RolesPrivilegeCreate],
                     privileges_middleware,
                 )),
             )
             .route(
                 "/roles/{role_id}/privileges/{privilege_id}",
                 delete(delete_role_privilege).route_layer(from_fn_with_state(
-                    RequiredPrivileges(vec![Privilege::RolesPrivilegeDelete]),
+                    vec![Privilege::RolesPrivilegeDelete],
                     privileges_middleware,
                 )),
             )

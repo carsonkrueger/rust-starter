@@ -4,3 +4,4 @@ pub mod icon;
 pub mod input;
 pub mod label;
 pub mod table;
+pub mod tabs;

@@ -13,24 +13,24 @@ pub fn page<'a>() -> templ_ret!['a] {
         #page_layout() {
             <div class="px-8 min-h-screen text-main flex flex-col items-center justify-center">
                 <form id="login" class="max-w-96 w-full">
-                    #col(&FormColProps::default()) {
-                        #title(&TitleProps::default()) {
+                    #col(FormColProps::default()) {
+                        #title(TitleProps::default()) {
                             Login
                         }
-                        #anchored(&AnchoredProps{
+                        #anchored(AnchoredProps{
                             label: "Email",
                             ..AnchoredProps::default()
                         }) {
-                            #input(&InputProps{
+                            #input(InputProps{
                                 name: "email",
                                 ..Default::default()
                             });
                         }
-                        #anchored(&AnchoredProps{
+                        #anchored(AnchoredProps{
                             label: "Password",
                             ..AnchoredProps::default()
                         }) {
-                            #input(&InputProps{
+                            #input(InputProps{
                                 name: "password",
                                 input_type: InputType::Password,
                                 ..Default::default()

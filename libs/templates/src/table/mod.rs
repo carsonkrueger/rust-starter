@@ -1,14 +1,14 @@
 use templr::{templ, templ_ret};
 use tw_merge::tw_merge;
 
-#[derive(Default)]
+#[derive(Default, Copy, Clone)]
 pub struct TableProps<'a> {
     pub id: Option<&'a str>,
     pub class: &'a str,
     pub attrs: &'a [(&'a str, &'a str)],
 }
 
-pub fn table<'a>(props: &'a TableProps<'a>) -> templ_ret!['a] {
+pub fn table<'a>(props: TableProps<'a>) -> templ_ret!['a] {
     templ! {
         #use children;
         <table
@@ -23,14 +23,14 @@ pub fn table<'a>(props: &'a TableProps<'a>) -> templ_ret!['a] {
     }
 }
 
-#[derive(Default)]
+#[derive(Default, Copy, Clone)]
 pub struct THeadProps<'a> {
     pub id: Option<&'a str>,
     pub class: &'a str,
     pub attrs: &'a [(&'a str, &'a str)],
 }
 
-pub fn thead<'a>(props: &'a THeadProps<'a>) -> templ_ret!['a] {
+pub fn thead<'a>(props: THeadProps<'a>) -> templ_ret!['a] {
     templ! {
         #use children;
         <thead
@@ -45,14 +45,14 @@ pub fn thead<'a>(props: &'a THeadProps<'a>) -> templ_ret!['a] {
     }
 }
 
-#[derive(Default)]
+#[derive(Default, Copy, Clone)]
 pub struct TBodyProps<'a> {
     pub id: Option<&'a str>,
     pub class: &'a str,
     pub attrs: &'a [(&'a str, &'a str)],
 }
 
-pub fn tbody<'a>(props: &'a TBodyProps<'a>) -> templ_ret!['a] {
+pub fn tbody<'a>(props: TBodyProps<'a>) -> templ_ret!['a] {
     templ! {
         #use children;
         <tbody
@@ -67,14 +67,14 @@ pub fn tbody<'a>(props: &'a TBodyProps<'a>) -> templ_ret!['a] {
     }
 }
 
-#[derive(Default)]
+#[derive(Default, Copy, Clone)]
 pub struct RowProps<'a> {
     pub id: Option<&'a str>,
     pub class: &'a str,
     pub attrs: &'a [(&'a str, &'a str)],
 }
 
-pub fn row<'a>(props: &'a RowProps<'a>) -> templ_ret!['a] {
+pub fn row<'a>(props: RowProps<'a>) -> templ_ret!['a] {
     templ! {
         #use children;
         <tr
@@ -96,14 +96,14 @@ pub struct ThProps<'a> {
     pub attrs: &'a [(&'a str, &'a str)],
 }
 
-pub fn th<'a>(props: &'a ThProps<'a>) -> templ_ret!['a] {
+pub fn th<'a>(props: ThProps<'a>) -> templ_ret!['a] {
     templ! {
         #use children;
         <th
             #if let Some(id) = props.id {
                 id={id}
             }
-            class={tw_merge!("h-10 px-2 text-left align-middle font-medium text-muted-foreground", props.class)}
+            class={tw_merge!("h-10 px-5 text-left align-middle font-medium text-muted-foreground", props.class)}
             {..props.attrs}
         >
             #children;
@@ -111,14 +111,14 @@ pub fn th<'a>(props: &'a ThProps<'a>) -> templ_ret!['a] {
     }
 }
 
-#[derive(Default)]
+#[derive(Default, Copy, Clone)]
 pub struct TdProps<'a> {
     pub id: Option<&'a str>,
     pub class: &'a str,
     pub attrs: &'a [(&'a str, &'a str)],
 }
 
-pub fn td<'a>(props: &'a TdProps<'a>) -> templ_ret!['a] {
+pub fn td<'a>(props: TdProps<'a>) -> templ_ret!['a] {
     templ! {
         #use children;
         <td

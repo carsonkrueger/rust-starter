@@ -41,14 +41,14 @@ pub struct DatastarTableProps {}
 
 pub fn datastar_table<'a, TD: IntoTableData>(_props: &'a DatastarTableProps) -> templ_ret!['a] {
     templ! {
-        <div class="flex flex-col gap-24 w-full">
+        <div class="flex flex-col gap-16 w-full">
             <div class="p-5">
-                #anchored::anchored(&AnchoredProps {
+                #anchored::anchored(AnchoredProps {
                     label: "Search",
                     class: "max-w-96",
                     ..Default::default()
                 }) {
-                    #input::input(&InputProps{
+                    #input::input(InputProps{
                         attrs: &[
                             ("data-bind", "query"),
                             ("data-on:input__debounce.300ms", &format!("@get('{}')", TD::ENDPOINT)),
@@ -59,30 +59,30 @@ pub fn datastar_table<'a, TD: IntoTableData>(_props: &'a DatastarTableProps) -> 
                     });
                 }
             </div>
-            #table(&TableProps{
+            #table(TableProps{
                 id: Some(TD::TABLE_ID),
                 ..Default::default()
             }) {
-                #thead(&THeadProps{
+                #thead(THeadProps{
                     class: "",
                     ..Default::default()
                 }) {
-                    #row(&RowProps::default()) {
+                    #row(RowProps::default()) {
                         #TD::thead_row();
                     }
                 }
-                #tbody(&TBodyProps{
+                #tbody(TBodyProps{
                     id: Some(TD::TABLE_BODY_ID),
                     ..Default::default()
                 });
-                #intersect_trigger(&IntersectRowProps{
+                #intersect_trigger(IntersectRowProps{
                     id: None,
                     endpoint: TD::ENDPOINT,
                     method: Method::GET,
                     indicator: Some(&indicator::<TD>()),
                 }) {
-                    #row(&RowProps::default()) {
-                        #td(&TdProps{
+                    #row(RowProps::default()) {
+                        #td(TdProps{
                             attrs: &[("colspan", "100%"), ("data-show", &format!("${}", &indicator::<TD>()))],
                             ..Default::default()
                         }) {
@@ -109,7 +109,7 @@ pub fn datastar_rows<'a, TD: IntoTableData>(
 ) -> templ_ret!['a] {
     templ! {
         #for r in props.rows {
-            #row(&RowProps::default()) {
+            #row(RowProps::default()) {
                 #r.table_data();
             }
         }

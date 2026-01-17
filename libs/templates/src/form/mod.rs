@@ -1,14 +1,14 @@
 use templr::{templ, templ_ret};
 use tw_merge::tw_merge;
 
-#[derive(Default)]
+#[derive(Default, Copy, Clone)]
 pub struct FormRowProps<'a> {
     pub id: Option<&'a str>,
     pub class: &'a str,
     pub attrs: &'a [(&'a str, &'a str)],
 }
 
-pub fn row<'a>(props: &'a FormRowProps<'a>) -> templ_ret!['a] {
+pub fn row<'a>(props: FormRowProps<'a>) -> templ_ret!['a] {
     templ! {
         #use children;
         <div
@@ -23,14 +23,14 @@ pub fn row<'a>(props: &'a FormRowProps<'a>) -> templ_ret!['a] {
     }
 }
 
-#[derive(Default)]
+#[derive(Default, Copy, Clone)]
 pub struct FormColProps<'a> {
     pub id: Option<&'a str>,
     pub class: &'a str,
     pub attrs: &'a [(&'a str, &'a str)],
 }
 
-pub fn col<'a>(props: &'a FormColProps<'a>) -> templ_ret!['a] {
+pub fn col<'a>(props: FormColProps<'a>) -> templ_ret!['a] {
     templ! {
         #use children;
         <div
@@ -45,14 +45,14 @@ pub fn col<'a>(props: &'a FormColProps<'a>) -> templ_ret!['a] {
     }
 }
 
-#[derive(Default)]
+#[derive(Default, Copy, Clone)]
 pub struct ItemProps<'a> {
     pub id: Option<&'a str>,
     pub class: &'a str,
     pub attrs: &'a [(&'a str, &'a str)],
 }
 
-pub fn item<'a>(props: &'a ItemProps<'a>) -> templ_ret!['a] {
+pub fn item<'a>(props: ItemProps<'a>) -> templ_ret!['a] {
     templ! {
         #use children;
         <div
@@ -67,14 +67,14 @@ pub fn item<'a>(props: &'a ItemProps<'a>) -> templ_ret!['a] {
     }
 }
 
-#[derive(Default)]
+#[derive(Default, Copy, Clone)]
 pub struct TitleProps<'a> {
     pub id: Option<&'a str>,
     pub class: &'a str,
     pub attrs: &'a [(&'a str, &'a str)],
 }
 
-pub fn title<'a>(props: &'a TitleProps<'a>) -> templ_ret!['a] {
+pub fn title<'a>(props: TitleProps<'a>) -> templ_ret!['a] {
     templ! {
         #use children;
         <h4

@@ -2,7 +2,7 @@ use strum::IntoStaticStr;
 use templr::{templ, templ_ret};
 use tw_merge::{AsTailwindClass, tw_merge};
 
-#[derive(Default)]
+#[derive(Default, Copy, Clone)]
 pub struct ButtonProps<'a> {
     pub id: Option<&'a str>,
     pub class: &'a str,
@@ -11,14 +11,14 @@ pub struct ButtonProps<'a> {
     pub attrs: &'a [(&'a str, &'a str)],
 }
 
-#[derive(Default)]
+#[derive(Default, Copy, Clone)]
 pub enum Variant {
     #[default]
     Primary,
     Transparent,
 }
 
-#[derive(Default, IntoStaticStr)]
+#[derive(Default, IntoStaticStr, Copy, Clone)]
 pub enum ButtonType {
     #[default]
     Button,

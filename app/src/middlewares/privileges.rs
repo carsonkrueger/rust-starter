@@ -6,16 +6,18 @@ use axum::{
     middleware::Next,
     response::IntoResponse,
 };
-use utils::extensions::{ctx::Ctx, privileges::RequiredPrivileges};
+use tracing::warn;
+use utils::{auth::privileges::Privilege, extensions::ctx::Ctx};
 
 pub async fn privileges_middleware(
-    State(RequiredPrivileges(privs)): State<RequiredPrivileges>,
+    State(privs): State<Vec<Privilege>>,
     Extension(ctx): Extension<Ctx>,
     req: Request<Body>,
     next: Next,
 ) -> impl IntoResponse {
     for p in &privs {
         if !ctx.privileges.contains(p) {
+            warn!("User does not have required privilege: {:?}", p);
             return StatusCode::FORBIDDEN.into_response();
         }
     }

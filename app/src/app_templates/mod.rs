@@ -30,24 +30,18 @@ pub enum Layout {
     Main,
 }
 
+/// Renders the template wrapping it with the index.html and the layout.
 pub fn render<'a>(
     f: Box<dyn Template + Send + 'a>,
     layout: Layout,
     headers: &HeaderMap,
 ) -> Response<Body> {
-    match datastar::is_request(headers) {
-        false => {
-            let layout_template = FnTemplate::new(move |w, ctx, _| {
-                match layout {
-                    Layout::Main => layouts::main::main(),
-                }
-                .render_with_children_into(w, ctx, &*f)
-            });
-            FnTemplate::new(move |w, ctx, _| {
-                index().render_with_children_into(w, ctx, &layout_template)
-            })
-            .into_response()
+    let layout_template = FnTemplate::new(move |w, ctx, _| {
+        match layout {
+            Layout::Main => layouts::main::main(),
         }
-        true => FnTemplate::new(move |w, ctx, _| f.render_into(w, ctx)).into_response(),
-    }
+        .render_with_children_into(w, ctx, &*f)
+    });
+    FnTemplate::new(move |w, ctx, _| index().render_with_children_into(w, ctx, &layout_template))
+        .into_response()
 }

@@ -37,24 +37,24 @@ impl IntoTableData for RolePrivilegeJoin {
     const TABLE_BODY_ID: &'static str = "rolePrivilegeTableBody";
     fn thead_row<'a>() -> templr::templ_ret!['a] {
         templ! {
-            #th(&ThProps::default()) {
+            #th(ThProps::default()) {
                 Role
             }
-            #th(&ThProps::default()) {
+            #th(ThProps::default()) {
                 Privilege
             }
-            #th(&ThProps::default());
+            #th(ThProps::default());
         }
     }
     fn table_data<'a>(&'a self) -> templr::templ_ret!['a] {
         templ! {
-            #td(&TdProps::default()) {
+            #td(TdProps::default()) {
                 {self.0.name}
             }
-            #td(&TdProps::default()) {
+            #td(TdProps::default()) {
                 {self.1.name}
             }
-            #td(&TdProps::default()) {
+            #td(TdProps::default()) {
                 <div class="flex items-center">
                     #button::button(ButtonProps{
                         variant: button::Variant::Transparent,

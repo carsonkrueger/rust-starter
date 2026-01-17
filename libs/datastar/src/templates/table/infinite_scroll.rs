@@ -8,7 +8,7 @@ pub struct IntersectRowProps<'a> {
     pub indicator: Option<&'a str>,
 }
 
-pub fn intersect_trigger<'a>(props: &'a IntersectRowProps<'a>) -> templ_ret!['a] {
+pub fn intersect_trigger<'a>(props: IntersectRowProps<'a>) -> templ_ret!['a] {
     templ! {
         #use children;
         <tfoot
