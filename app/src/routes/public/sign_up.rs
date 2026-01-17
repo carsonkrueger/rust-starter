@@ -1,7 +1,6 @@
 use axum::{
     Json, Router,
     extract::State,
-    http::HeaderMap,
     response::{IntoResponse, Redirect},
     routing::{get, post},
 };
@@ -30,10 +29,10 @@ impl NestedRouter<AppState> for SignUpRoute {
     }
 }
 
-async fn sign_up_page(headers: HeaderMap) -> impl IntoResponse {
+async fn sign_up_page() -> impl IntoResponse {
     trace!("->> sign_up_page");
     let page = pages::sign_up::page();
-    app_templates::render(Box::new(page), Layout::Main, &headers)
+    app_templates::render(Box::new(page), Layout::Main)
 }
 
 async fn sign_up(

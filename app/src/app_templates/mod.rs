@@ -1,8 +1,7 @@
 use axum::body::Body;
-use axum::http::{HeaderMap, Response};
+use axum::http::Response;
 use axum::response::IntoResponse;
 use templr::{FnTemplate, Template, templ, templ_ret};
-use utils::datastar;
 
 pub mod layouts;
 pub mod pages;
@@ -26,21 +25,20 @@ pub fn index<'a>() -> templ_ret!['a] {
     }
 }
 
+#[allow(unused)]
 pub enum Layout {
     Main,
+    Management,
 }
 
 /// Renders the template wrapping it with the index.html and the layout.
-pub fn render<'a>(
-    f: Box<dyn Template + Send + 'a>,
-    layout: Layout,
-    headers: &HeaderMap,
-) -> Response<Body> {
+pub fn render<'a>(f: Box<dyn Template + Send + 'a>, layout: Layout) -> Response<Body> {
     let layout_template = FnTemplate::new(move |w, ctx, _| {
-        match layout {
-            Layout::Main => layouts::main::main(),
-        }
-        .render_with_children_into(w, ctx, &*f)
+        let l: Box<dyn Template> = match layout {
+            Layout::Main => Box::new(layouts::main::main()),
+            Layout::Management => Box::new(layouts::management::management()),
+        };
+        l.render_with_children_into(w, ctx, &*f)
     });
     FnTemplate::new(move |w, ctx, _| index().render_with_children_into(w, ctx, &layout_template))
         .into_response()

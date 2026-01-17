@@ -21,7 +21,7 @@ pub trait RolesPrivilegesRepository {
         db: &mut DbConn,
         role_id: i16,
         privilege_id: i64,
-    ) -> RepositoryResult<()>;
+    ) -> RepositoryResult<Option<RolePrivilege>>;
 }
 
 #[derive(Debug)]
@@ -51,16 +51,20 @@ impl RolesPrivilegesRepository for RolesPrivileges {
         db: &mut DbConn,
         role_id: i16,
         privilege_id: i64,
-    ) -> RepositoryResult<()> {
+    ) -> RepositoryResult<Option<RolePrivilege>> {
         trace!("->> delete");
-        diesel::delete(roles_privileges::table)
+        let res = diesel::delete(roles_privileges::table)
             .filter(
                 roles_privileges::role_id
                     .eq(role_id)
                     .and(roles_privileges::privilege_id.eq(privilege_id)),
             )
-            .execute(db)
-            .await?;
-        Ok(())
+            .returning(RolePrivilege::as_returning())
+            .get_result(db)
+            .await;
+        if let Err(diesel::result::Error::NotFound) = res {
+            return Ok(None);
+        }
+        Ok(Some(res?))
     }
 }

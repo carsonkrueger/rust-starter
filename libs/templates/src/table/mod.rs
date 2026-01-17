@@ -81,7 +81,7 @@ pub fn row<'a>(props: RowProps<'a>) -> templ_ret!['a] {
             #if let Some(id) = props.id {
                 id={id}
             }
-            class={tw_merge!("border-b transition-colors hover:bg-muted/50", props.class)}
+            class={tw_merge!("border-b transition-colors hover:bg-muted/10", props.class)}
             {..props.attrs}
         >
             #children;

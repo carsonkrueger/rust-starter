@@ -10,7 +10,7 @@ use templr::templ;
 
 use crate::db::auth::{privilege::Privilege, role::Role};
 
-#[derive(Queryable, Selectable, Insertable)]
+#[derive(Queryable, Selectable, Insertable, Debug)]
 #[diesel(table_name = schemas::auth::roles_privileges)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct RolePrivilege {
@@ -63,11 +63,15 @@ impl IntoTableData for RolePrivilegeJoin {
                     }) {
                         #icon::icon(IconProps{
                             icon: Icon::Trash2,
+                            size: 16,
                             ..Default::default()
                         });
                     }
                 </div>
             }
         }
+    }
+    fn row_id(&self) -> String {
+        format!("role{}Privilege{}", self.0.id, self.1.id)
     }
 }

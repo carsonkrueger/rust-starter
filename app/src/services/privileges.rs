@@ -21,7 +21,11 @@ pub trait PrivilegesService {
         privileges: &[utils::auth::privileges::Privilege],
     ) -> ServiceResult<Vec<RolePrivilege>>;
     async fn list_roles_privileges(&self) -> ServiceResult<Vec<RolePrivilegeJoin>>;
-    async fn disassociate(&self, role_id: i16, privilege_id: i64) -> ServiceResult<()>;
+    async fn disassociate(
+        &self,
+        role_id: i16,
+        privilege_id: i64,
+    ) -> ServiceResult<Option<RolePrivilege>>;
 }
 
 #[derive(Debug, Clone)]
@@ -89,12 +93,17 @@ impl PrivilegesService for Privileges {
         let roles_privileges = self.repos.roles.join_list(&mut db).await?;
         Ok(roles_privileges)
     }
-    async fn disassociate(&self, role_id: i16, privilege_id: i64) -> ServiceResult<()> {
+    async fn disassociate(
+        &self,
+        role_id: i16,
+        privilege_id: i64,
+    ) -> ServiceResult<Option<RolePrivilege>> {
         let mut db = self.pool.get().await?;
-        self.repos
+        let row = self
+            .repos
             .roles_privileges
             .delete(&mut db, role_id, privilege_id)
             .await?;
-        Ok(())
+        Ok(row)
     }
 }

@@ -83,4 +83,7 @@ impl IntoTableData for User {
             }
         }
     }
+    fn row_id(&self) -> String {
+        format!("user{}", self.id)
+    }
 }

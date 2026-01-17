@@ -1,13 +1,16 @@
 use axum::{
     Router,
     extract::{Path, Query, State},
-    http::HeaderMap,
     middleware::from_fn_with_state,
     response::IntoResponse,
     routing::{delete, get},
 };
-use datastar::templates::table::{search_params::DatastarSearchParams, table_patch_stream};
-use tracing::trace;
+use datastar::{
+    modes::DatastarMode,
+    templates::table::{IntoTableData, search_params::DatastarSearchParams, table_patch_stream},
+};
+use models::db::auth::{role::Role, role_privilege::RolePrivilegeJoin};
+use tracing::{info, trace};
 use utils::auth::privileges::Privilege;
 
 use crate::{
@@ -74,10 +77,10 @@ impl NestedRouter<AppState> for ManagementRoute {
 }
 // /roles/{}/privilege/{}
 
-async fn users_page(header_map: HeaderMap) -> RouteResult<impl IntoResponse> {
+async fn users_page() -> RouteResult<impl IntoResponse> {
     trace!("->> users_page");
     let page = management_users::page();
-    Ok(render(Box::new(page), Layout::Main, &header_map))
+    Ok(render(Box::new(page), Layout::Management))
 }
 
 async fn users_rows(
@@ -95,10 +98,10 @@ async fn users_rows(
     Ok(stream)
 }
 
-async fn roles_privileges_page(header_map: HeaderMap) -> RouteResult<impl IntoResponse> {
+async fn roles_privileges_page() -> RouteResult<impl IntoResponse> {
     trace!("->> roles_privileges_page");
     let page = management_roles_privileges::page();
-    Ok(render(Box::new(page), Layout::Main, &header_map))
+    Ok(render(Box::new(page), Layout::Management))
 }
 
 async fn roles_privileges_rows(
@@ -124,6 +127,29 @@ async fn delete_role_privilege(
     Path((role_id, privilege_id)): Path<(i16, i64)>,
 ) -> RouteResult<impl IntoResponse> {
     trace!("->> delete_role_privilege");
-    privileges.disassociate(role_id, privilege_id).await?;
-    Ok("")
+    let deleted = privileges.disassociate(role_id, privilege_id).await?;
+    if let Some(row) = deleted {
+        // Need to use this join model to get the row_id() method to remove the element
+        let join = RolePrivilegeJoin(
+            Role {
+                id: row.role_id,
+                name: "".into(),
+                created_at: None,
+                updated_at: None,
+            },
+            models::db::auth::privilege::Privilege {
+                id: row.privilege_id,
+                name: "".into(),
+                created_at: None,
+                updated_at: None,
+            },
+        );
+        let selector = format!("#{}", join.row_id());
+        Ok(datastar::patch_elements()
+            .mode(DatastarMode::Remove)
+            .selector(selector)
+            .axum_stream())
+    } else {
+        Ok(datastar::patch_elements().axum_stream())
+    }
 }

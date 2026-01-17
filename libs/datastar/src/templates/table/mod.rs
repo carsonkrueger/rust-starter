@@ -26,39 +26,52 @@ pub trait IntoTableData {
     const ENDPOINT: &'static str;
     const TABLE_ID: &'static str;
     const TABLE_BODY_ID: &'static str;
-    /// Returns only the <td> elements
+    /// Returns only the <td> elements.
     fn table_data<'a>(&'a self) -> templ_ret!['a];
-    /// Returns only the <th> elements
+    /// Returns only the <th> elements>
     fn thead_row<'a>() -> templ_ret!['a];
+    /// Returns the unique row id.
+    fn row_id(&self) -> String;
 }
 
 fn indicator<TD: IntoTableData>() -> String {
     TD::TABLE_ID.to_string() + "Indicator"
 }
 
-#[derive(Default)]
-pub struct DatastarTableProps {}
+pub struct DatastarTableProps {
+    pub use_search_bar: bool,
+}
 
-pub fn datastar_table<'a, TD: IntoTableData>(_props: &'a DatastarTableProps) -> templ_ret!['a] {
+impl Default for DatastarTableProps {
+    fn default() -> Self {
+        Self {
+            use_search_bar: true,
+        }
+    }
+}
+
+pub fn datastar_table<'a, TD: IntoTableData>(props: DatastarTableProps) -> templ_ret!['a] {
     templ! {
         <div class="flex flex-col gap-16 w-full">
-            <div class="p-5">
-                #anchored::anchored(AnchoredProps {
-                    label: "Search",
-                    class: "max-w-96",
-                    ..Default::default()
-                }) {
-                    #input::input(InputProps{
-                        attrs: &[
-                            ("data-bind", "query"),
-                            ("data-on:input__debounce.300ms", &format!("@get('{}')", TD::ENDPOINT)),
-                            ("data-on:input", "$page = 1"),
-                            ("data-indicator", &indicator::<TD>())
-                        ],
+            #if props.use_search_bar {
+                <div class="p-5">
+                    #anchored::anchored(AnchoredProps {
+                        label: "Search",
+                        class: "max-w-96",
                         ..Default::default()
-                    });
-                }
-            </div>
+                    }) {
+                        #input::input(InputProps{
+                            attrs: &[
+                                ("data-bind", "query"),
+                                ("data-on:input__debounce.300ms", &format!("@get('{}')", TD::ENDPOINT)),
+                                ("data-on:input", "$page = 1"),
+                                ("data-indicator", &indicator::<TD>())
+                            ],
+                            ..Default::default()
+                        });
+                    }
+                </div>
+            }
             #table(TableProps{
                 id: Some(TD::TABLE_ID),
                 ..Default::default()
@@ -104,12 +117,13 @@ pub struct DatastarRowsProps<'a, TD: IntoTableData> {
     pub rows: &'a [TD],
 }
 
-pub fn datastar_rows<'a, TD: IntoTableData>(
-    props: &'a DatastarRowsProps<'a, TD>,
-) -> templ_ret!['a] {
+pub fn datastar_rows<'a, TD: IntoTableData>(props: DatastarRowsProps<'a, TD>) -> templ_ret!['a] {
     templ! {
         #for r in props.rows {
-            #row(RowProps::default()) {
+            #row(RowProps{
+                id: Some(&r.row_id()),
+                ..Default::default()
+            }) {
                 #r.table_data();
             }
         }
@@ -121,7 +135,7 @@ pub fn table_patch_events<'a, TD: IntoTableData, S: Into<TableSearchParams>>(
     rows: &[TD],
     search_params: S,
 ) -> Result<Vec<Event>, templr::Error> {
-    let row_templates = datastar_rows(&DatastarRowsProps { rows }).render(&())?;
+    let row_templates = datastar_rows(DatastarRowsProps { rows }).render(&())?;
     let mut search_params = search_params.into();
     let mode = match search_params.page {
         1 => DatastarMode::Inner,

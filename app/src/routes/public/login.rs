@@ -1,7 +1,6 @@
 use axum::{
     Form, Router,
     extract::State,
-    http::HeaderMap,
     response::IntoResponse,
     routing::{get, post},
 };
@@ -34,10 +33,10 @@ impl NestedRouter<AppState> for LoginRoute {
     }
 }
 
-async fn login_page(headers: HeaderMap) -> impl IntoResponse {
+async fn login_page() -> impl IntoResponse {
     trace!("->> login_page");
     let page = pages::login::page();
-    app_templates::render(Box::new(page), Layout::Main, &headers)
+    app_templates::render(Box::new(page), Layout::Main)
 }
 
 async fn login(
