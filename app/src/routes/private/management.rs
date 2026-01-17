@@ -10,7 +10,7 @@ use datastar::{
     templates::table::{IntoTableData, search_params::DatastarSearchParams, table_patch_stream},
 };
 use models::db::auth::{role::Role, role_privilege::RolePrivilegeJoin};
-use tracing::{info, trace};
+use tracing::trace;
 use utils::auth::privileges::Privilege;
 
 use crate::{
