@@ -29,8 +29,12 @@ This strict separation enforces clean boundaries, improves testability, and supp
 
 ## Installation
 
-`make app` to watch your rust files. This runs the server locally but runs the postgres instance within a docker container.
+I use cargo watch for live development: `cargo install cargo-watch --locked`
+
+Install Diesel CLI to handle schema and migration management: `cargo install diesel_cli`
+
+`make tw` to watch your tailwind class styles.
 
 in another terminal:
 
-`make tw` to watch your tailwind class styles
+`make app` to watch your rust files. This runs the server locally but runs the postgres instance within a docker container.

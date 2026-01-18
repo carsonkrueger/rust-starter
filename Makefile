@@ -4,7 +4,7 @@ DIESEL_CMD := ~/.cargo/bin/diesel
 SCHEMA_FILE := libs/schemas/lib.rs
 
 app: docker-postgres
-	cargo watch -q -C ./app -x 'run -- ../DEVOPS/dev/.env'
+	cargo watch -q -C ./app -x 'run -- ../DEVOPS/dev/.env' -d 0.2
 
 tw:
 	npx @tailwindcss/cli -i app/app.css -o app/public/css/index.css --watch
