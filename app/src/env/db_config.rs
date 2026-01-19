@@ -5,15 +5,23 @@ pub struct DBConfig {
     password: String,
     pub db_name: String,
     pub max_conns: u32,
+    pub host: String,
 }
 
 impl DBConfig {
-    pub fn parse() -> Self {
+    pub fn parse(internal: bool) -> Self {
         Self {
-            port: dotenvy::var("DB_PORT")
-                .expect("Missing env: DB_PORT")
+            host: dotenvy::var("DB_HOST")
+                .expect("Missing env: DB_HOST")
                 .parse()
-                .expect("Invalid DB_PORT"),
+                .expect("Invalid DB_HOST"),
+            port: match internal {
+                false => dotenvy::var("DB_PORT")
+                    .expect("Missing env: DB_PORT")
+                    .parse()
+                    .expect("Invalid DB_PORT"),
+                true => 5432,
+            },
             db_name: dotenvy::var("DB_NAME")
                 .expect("Missing env: DB_NAME")
                 .parse()
@@ -34,8 +42,8 @@ impl DBConfig {
     }
     pub fn url(&self) -> String {
         format!(
-            "postgres://{}:{}@localhost:{}/{}",
-            self.user, self.password, self.port, self.db_name
+            "postgres://{}:{}@{}:{}/{}",
+            self.user, self.password, self.host, self.port, self.db_name
         )
     }
 }

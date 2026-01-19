@@ -16,7 +16,7 @@ use tracing::trace;
 use utils::auth::{
     self, MAX_COOKIE_AGE_DAYS,
     hash::{hash_password, verify_password},
-    roles::ROLE_BASIC,
+    roles::ROLE_ADMIN,
 };
 
 // #[async_trait]
@@ -82,7 +82,7 @@ impl AuthService for Auth {
             first_name: sign_up.first_name,
             last_name: sign_up.last_name,
             password: hash_password(&sign_up.password)?,
-            role_id: ROLE_BASIC,
+            role_id: ROLE_ADMIN, // TODO: CHANGE TO ROLE_BASIC, this is admin for testing purposes only
             ..Default::default()
         };
         let mut conn = self.pool.get().await?;

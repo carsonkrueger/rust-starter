@@ -1,4 +1,4 @@
-use std::{path::Path, time::Duration};
+use std::{path::Path, sync::Arc, time::Duration};
 
 use bb8::Pool;
 use diesel_async::pooled_connection::AsyncDieselConnectionManager;
@@ -29,27 +29,25 @@ mod services;
 
 #[tokio::main]
 async fn main() {
+    // Parse env
     let args = std::env::args().collect::<Vec<String>>();
-
-    let env_path = match args.get(1) {
+    let env_path = match args.get(2) {
         Some(arg) => Some(Path::new(arg)),
         None => None,
     };
-
     let cfg = Config::parse(env_path);
-    let db_cfg = DBConfig::parse();
+    let db_cfg = DBConfig::parse(cfg.internal);
 
-    // let pool = connection_pool(&db_cfg);
+    // Setup app state: db connections, repositories and services
     let pool = connection_pool(&db_cfg).await;
-
     let repos = RepositoryManager::default();
-    let svc = ServiceManager::<_, Privileges, _>::default(pool, repos);
-    let priv_service = svc.privileges.clone();
+    let svc = ServiceManager::default(pool.clone(), repos);
     let ctx = AppState {
         cfg: cfg.clone(),
         svc,
     };
 
+    // Setup tracing
     let filter = EnvFilter::new("")
         .add_directive("app=trace".parse().unwrap())
         .add_directive("utils=warn".parse().unwrap())
@@ -58,20 +56,24 @@ async fn main() {
         .add_directive("schemas=error".parse().unwrap());
     tracing_subscriber::fmt().with_env_filter(filter).init();
 
+    // Associate all privileges to the admin role
+    let temp_priv_service = Privileges::new(pool, Arc::new(RepositoryManager::default()));
     let privs: Vec<Privilege> = Privilege::iter().collect();
-    if let Err(e) = priv_service.associate(ROLE_ADMIN, &privs).await {
+    if let Err(e) = temp_priv_service.associate(ROLE_ADMIN, &privs).await {
         error!("Failed to associate admin privileges: {}", e);
         panic!("Failed to associate admin privileges: {}", e);
     }
-    let router = routes::build_router(ctx.clone());
 
-    let addr = format!("localhost:{}", ctx.cfg.port);
+    // Build router
+    let router = routes::build_router(ctx.clone());
+    let addr = format!("{}:{}", ctx.cfg.host, ctx.cfg.port);
     let listener = TcpListener::bind(&addr)
         .await
         .expect(&format!("Could not listen on: {}", &addr));
 
     println!("Listening on: http://{}", addr);
 
+    // Start server
     axum::serve(listener, router)
         .await
         .expect("could not serve application")

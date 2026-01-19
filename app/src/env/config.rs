@@ -3,6 +3,8 @@ use std::path::Path;
 #[derive(Clone, Debug)]
 pub struct Config {
     pub port: i64,
+    pub host: String,
+    pub internal: bool,
 }
 
 impl Config {
@@ -17,6 +19,14 @@ impl Config {
                 .expect("Missing env: PORT")
                 .parse()
                 .expect("Invalid PORT"),
+            host: dotenvy::var("HOST")
+                .expect("Missing env: HOST")
+                .parse()
+                .expect("Invalid HOST"),
+            internal: dotenvy::var("INTERNAL")
+                .unwrap_or("false".to_string())
+                .parse()
+                .expect("Invalid INTERNAL"),
         }
     }
 }

@@ -1,31 +1,44 @@
 # === Stage 1: Build ===
-FROM rust:1.91-alpine3.22 AS builder
+FROM rust:1.91-slim-bookworm AS builder
 
-WORKDIR /app
+WORKDIR /build
 
-COPY Cargo.toml Cargo.lock ./
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    libpq-dev \
+    pkg-config \
+    libssl-dev \
+    && rm -rf /var/lib/apt/lists/*
 
-# Build dependencies, but discard the output (the actual application)
-# This forces the caching of all dependency compilation
-RUN mkdir src \
-    && echo "fn main() {println!(\"placeholder\");}" > src/main.rs \
-    && cargo build --release \
-    && rm -rf src
+RUN cargo install diesel_cli --no-default-features --features postgres
 
-COPY src ./src
+COPY app/Cargo.toml app/Cargo.lock ./app/
+COPY app/src ./app/src
+COPY libs ./libs
 
-RUN cargo build --release
+RUN cargo build --release --manifest-path app/Cargo.toml
 
 # === Stage 2: Runtime ===
-FROM alpine:3.19 AS runtime
+FROM debian:bookworm-slim
 
-WORKDIR /usr/local/bin
+WORKDIR /usr/local/bin/app
 
-RUN apk add --no-cache postgresql-client bash
+RUN apt-get update && apt-get install -y \
+    libpq5 \
+    ca-certificates \
+    bash \
+    && rm -rf /var/lib/apt/lists/*
 
-COPY --from=builder /app/target/release/app .
-COPY entrypoint.sh .
+RUN mkdir -p /usr/local/bin/app/public
+RUN mkdir -p /usr/local/bin/app/migrations
 
-ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+COPY --from=builder /usr/local/cargo/bin/diesel .
+COPY --from=builder /build/app/target/release/app .
+COPY app/public ./public
+COPY app/migrations ./migrations
+COPY app/diesel.toml ./
+COPY app/entrypoint.sh ./
 
-# CMD ["./your_app_name"]
+EXPOSE 8080
+
+ENTRYPOINT ["/usr/local/bin/app/entrypoint.sh"]

@@ -1,0 +1,16 @@
+# Ignore everything by default
+**
+
+!app/Dockerfile
+!app/entrypoint.sh
+!app/Cargo.toml
+!app/Cargo.lock
+!app/diesel.toml
+!app/src/
+!app/public/
+!app/diesel.toml
+!app/migrations
+
+!libs
+
+**/target/

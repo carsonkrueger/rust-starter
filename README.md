@@ -29,6 +29,8 @@ This strict separation enforces clean boundaries, improves testability, and supp
 
 ## Installation
 
+Rename & modify the `example.env` to `.env`
+
 I use cargo watch for live development: `cargo install cargo-watch --locked`
 
 Install Diesel CLI to handle schema and migration management: `cargo install diesel_cli`

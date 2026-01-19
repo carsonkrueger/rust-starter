@@ -1,5 +1,5 @@
 use axum::{
-    Json, Router,
+    Form, Router,
     extract::State,
     response::{IntoResponse, Redirect},
     routing::{get, post},
@@ -40,7 +40,7 @@ async fn sign_up(
         svc: ServiceManager { auth, .. },
         ..
     }): State<AppState>,
-    Json(sign_up): Json<SignUp>,
+    Form(sign_up): Form<SignUp>,
 ) -> RouteResult<impl IntoResponse> {
     trace!("->> sign_up");
     auth.sign_up(sign_up).await?;

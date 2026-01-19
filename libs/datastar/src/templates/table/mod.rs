@@ -76,10 +76,7 @@ pub fn datastar_table<'a, TD: IntoTableData>(props: DatastarTableProps) -> templ
                 id: Some(TD::TABLE_ID),
                 ..Default::default()
             }) {
-                #thead(THeadProps{
-                    class: "",
-                    ..Default::default()
-                }) {
+                #thead(THeadProps::default()) {
                     #row(RowProps::default()) {
                         #TD::thead_row();
                     }
