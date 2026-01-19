@@ -2,13 +2,14 @@
 set -xe
 
 # BASIC example of a build and deploy script (not fully tested)
+# Run from the root directory of the project
 
 # Setup remote directory
 ssh myuser@ip 'mkdir -p ~/prod_app'
 
 # Build
 scp docker-compose.yml myuser@ip:~/prod_app
-docker build -t prod_app:latest .
+docker build -f app/Dockerfile -t prod_app:latest .
 docker save prod_app:latest -o prod_app.tar
 ssh-add ~/.ssh/id_ed25519_prod_app # <-- UPDATE ME add your ssh keys here for remote machine
 scp prod_app.tar myuser@ip:~/prod_app
