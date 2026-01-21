@@ -1,8 +1,9 @@
 #!/bin/bash
 set -xe
 
-# BASIC example of a deploy script. You should run build_all.sh before this.
+# BASIC example of a deploy script.
 # Run from the root directory of the project
+# You should run build_all.sh before this.
 
 USER=john_doe # FIX ME
 IP=192.168.1.1 # FIX ME

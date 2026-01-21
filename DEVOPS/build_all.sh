@@ -1,7 +1,9 @@
 #!/bin/bash
 set -xe
 
-# You should run deploy.sh after this
+# BASIC example of a build.
+# Run from the root directory of the project
+# You should run deploy.sh after this.
 
 ENV=$1
 if [ "$ENV" != "beta" ] && [ "$ENV" != "prod" ]; then
