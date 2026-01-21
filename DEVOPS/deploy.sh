@@ -1,6 +1,9 @@
 #!/bin/bash
 set -xe
 
+# ARGS: {environment}
+# Example: ./DEVOPS/deploy.sh prod
+
 # BASIC example of a deploy script.
 # Run from the root directory of the project
 # You should run build_all.sh before this.

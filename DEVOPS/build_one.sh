@@ -1,6 +1,9 @@
 #!/bin/bash
 set -xe
 
+# ARGS: {environment} {binary_name}
+# Example: ./DEVOPS/build_one.sh prod app
+
 # BASIC example of a build.
 # Run from the root directory of the project
 # You should run deploy.sh after this.
