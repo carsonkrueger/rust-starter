@@ -10,5 +10,4 @@ if [ "$ENV" != "beta" ] && [ "$ENV" != "prod" ]; then
 fi
 
 # Build All images (we only have one binary right now)
-ssh-add ~/.ssh/id_ed25519 # <-- UPDATE ME add your ssh keys here
 ./DEVOPS/build_app.sh $ENV app
