@@ -1,3 +1,8 @@
+use std::{
+    sync::OnceLock,
+    time::{SystemTime, UNIX_EPOCH},
+};
+
 use axum::body::Body;
 use axum::http::Response;
 use axum::response::IntoResponse;
@@ -5,6 +10,17 @@ use templr::{FnTemplate, Template, templ, templ_ret};
 
 pub mod layouts;
 pub mod pages;
+
+static VERSION: OnceLock<u128> = OnceLock::new();
+
+fn version() -> u128 {
+    *VERSION.get_or_init(|| {
+        SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap_or_default()
+            .as_millis()
+    })
+}
 
 pub fn index<'a>() -> templ_ret!['a] {
     templ! {
@@ -15,7 +31,7 @@ pub fn index<'a>() -> templ_ret!['a] {
                 <title>Rust Starter</title>
                 <meta charset="UTF-8" />
                 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-                <link href="/public/css/index.css" rel="stylesheet" />
+                <link href={format!("/public/css/index.css?v={}", version())} rel="stylesheet" />
                 <script type="module" src="/public/js/datastar.js" />
             </head>
             <body class="min-h-screen bg-background">
