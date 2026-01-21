@@ -42,7 +42,7 @@ in another terminal:
 `make app` to watch your rust files. This runs the server locally but runs the postgres instance within a docker container.
 
 # Project Structure
-
+```
 ├── app/                # Only binary; handles orchestration and app_db
 ├── DEVOPS/             # Deployment scripts and environment configurations
 ├── libs/               # Project-agnostic shared Rust crates
@@ -51,3 +51,4 @@ in another terminal:
 │   ├── schemas/        # Database models (Diesel-generated)
 │   └── templates/      # Framework-agnostic Templr templates
 └── README.md           # Project documentation
+```
