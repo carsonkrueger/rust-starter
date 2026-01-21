@@ -23,8 +23,8 @@ services:
             app_db:
                 condition: service_healthy
         build:
-            dockerfile: app/Dockerfile
             context: ../../
+            dockerfile: app/Dockerfile
         ports:
             - "${PORT}:${PORT}"
         env_file:

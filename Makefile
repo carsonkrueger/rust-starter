@@ -58,3 +58,7 @@ docker: docker-down tw-once
 
 docker-down:
 	docker compose -f ./DEVOPS/dev/docker-compose.yml --env-file ./DEVOPS/dev/.env down
+
+deploy-prod:
+	./DEVOPS/build_all.sh prod
+	./DEVOPS/deploy.sh prod
