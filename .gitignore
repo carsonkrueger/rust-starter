@@ -32,6 +32,6 @@ Thumbs.db
 tmp/
 node_modules
 
-.env
+.env*
 index.css
 build

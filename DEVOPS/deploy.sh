@@ -1,0 +1,22 @@
+#!/bin/bash
+set -xe
+
+# BASIC example of a deploy script. You should run build_all.sh before this.
+# Run from the root directory of the project
+
+USER=john_doe # FIX ME
+IP=192.168.1.1 # FIX ME
+
+ENV=$1
+if [ "$ENV" != "beta" ] && [ "$ENV" != "prod" ]; then
+    echo "Invalid environment. Please specify either beta or prod"
+    exit 1
+fi
+
+cd ./DEVOPS/"$ENV"
+
+ssh-add ~/.ssh/id_ed25519 # <-- UPDATE ME add your ssh keys here for remote machine
+
+# Deploy
+scp docker-compose.yml "$USER@$IP:~/$ENV"
+ssh carson@142.93.81.211 "docker compose -f ~/$ENV/docker-compose.yml --env-file ~/$ENV/.env up -d"

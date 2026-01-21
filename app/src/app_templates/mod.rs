@@ -31,7 +31,7 @@ pub fn index<'a>() -> templ_ret!['a] {
                 <title>Rust Starter</title>
                 <meta charset="UTF-8" />
                 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-                <link href={format!("/public/css/index.css?v={}", version())} rel="stylesheet" />
+                <link href={ format!("/public/css/index.css?v={}", version()) } rel="stylesheet" />
                 <script type="module" src="/public/js/datastar.js" />
             </head>
             <body class="min-h-screen bg-background">

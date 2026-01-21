@@ -23,6 +23,9 @@ services:
         depends_on:
             app_db:
                 condition: service_healthy
+        build:
+            context: ../../
+            dockerfile: app/Dockerfile
         ports:
             - "${PORT}:${PORT}"
         env_file:
