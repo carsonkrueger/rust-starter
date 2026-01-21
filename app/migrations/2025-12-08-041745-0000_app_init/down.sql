@@ -9,6 +9,4 @@ DROP TABLE IF EXISTS auth.roles;
 
 DROP TABLE IF EXISTS auth.privileges;
 
-DROP TABLE IF EXISTS auth.participants;
-
 DROP SCHEMA IF EXISTS auth CASCADE;

@@ -9,6 +9,7 @@ use axum::{
 use tracing::warn;
 use utils::{auth::privileges::Privilege, extensions::ctx::Ctx};
 
+/// Enforces that the user is authenticated and has the required privileges.
 pub async fn privileges_middleware(
     State(privs): State<Vec<Privilege>>,
     Extension(ctx): Extension<Ctx>,

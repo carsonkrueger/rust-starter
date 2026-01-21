@@ -1,8 +1,9 @@
 use chrono::NaiveDateTime;
 use diesel::prelude::*;
+use schemas::app;
 
 #[derive(Queryable, Selectable, Insertable, Clone, Debug)]
-#[diesel(table_name = schemas::auth::sessions)]
+#[diesel(table_name = app::auth::sessions)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 #[diesel(primary_key(user_id, token))]
 pub struct Session {

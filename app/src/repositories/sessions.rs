@@ -3,7 +3,7 @@ use diesel::SelectableHelper;
 use diesel::prelude::*;
 use models::db::auth::session::Session;
 use models::db::auth::user::User;
-use schemas::auth::{sessions, users};
+use schemas::app::auth::{sessions, users};
 
 use diesel_async::RunQueryDsl;
 use tracing::trace;

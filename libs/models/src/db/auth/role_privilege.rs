@@ -1,6 +1,7 @@
 use chrono::NaiveDateTime;
 use datastar::templates::table::IntoTableData;
 use diesel::prelude::*;
+use schemas::app;
 use templates::{
     button::{self, ButtonProps},
     icon::{self, IconProps, icon_data::Icon},
@@ -11,7 +12,7 @@ use templr::templ;
 use crate::db::auth::{privilege::Privilege, role::Role};
 
 #[derive(Queryable, Selectable, Insertable, Debug)]
-#[diesel(table_name = schemas::auth::roles_privileges)]
+#[diesel(table_name = app::auth::roles_privileges)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct RolePrivilege {
     #[diesel(skip_update)]

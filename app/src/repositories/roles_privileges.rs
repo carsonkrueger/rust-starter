@@ -3,7 +3,7 @@ use diesel::{BoolExpressionMethods, ExpressionMethods, SelectableHelper};
 use models::db::auth::role_privilege::RolePrivilege;
 
 use diesel_async::RunQueryDsl;
-use schemas::auth::roles_privileges;
+use schemas::app::auth::roles_privileges;
 use tracing::trace;
 
 use crate::repositories::RepositoryResult;

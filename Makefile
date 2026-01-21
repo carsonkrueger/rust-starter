@@ -1,7 +1,7 @@
 include app/.env
 
 DIESEL_CMD := ~/.cargo/bin/diesel
-APP_SCHEMA_FILE := libs/schemas/lib.rs
+APP_SCHEMA_FILE := libs/schemas/src/app.rs
 APP_DIESEL_TOML := app/diesel.toml
 APP_ENV := DEVOPS/dev/.env
 DB_URL := "postgres://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}?sslmode=disable"

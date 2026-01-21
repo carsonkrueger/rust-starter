@@ -4,6 +4,7 @@ use utils::extensions::ctx::CtxResult;
 
 use crate::routes::RouteResult;
 
+/// Enforces that the user is authenticated.
 pub async fn auth_middleware(
     Extension(res_ctx): Extension<CtxResult>,
     mut req: Request<Body>,

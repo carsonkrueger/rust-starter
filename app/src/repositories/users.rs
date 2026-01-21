@@ -4,7 +4,7 @@ use diesel::prelude::*;
 use diesel_async::RunQueryDsl;
 use models::api::search_params::SearchParams;
 use models::db::auth::user::User;
-use schemas::auth::users;
+use schemas::app::auth::users;
 use tracing::trace;
 
 use crate::repositories::RepositoryResult;

@@ -1,8 +1,9 @@
 use chrono::NaiveDateTime;
 use diesel::prelude::*;
+use schemas::app;
 
 #[derive(Queryable, Selectable, Insertable)]
-#[diesel(table_name = schemas::auth::roles)]
+#[diesel(table_name = app::auth::roles)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct Role {
     #[diesel(skip_update)]

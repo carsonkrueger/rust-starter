@@ -20,7 +20,8 @@ use crate::{
     services::{self, ServiceManager, auth::AuthService},
 };
 
-pub async fn trace_middleware(
+/// Inserts user result and privileges into the request extensions. Also adds user_id into tracing span.
+pub async fn ctx_middleware(
     State(AppState {
         svc: ServiceManager { auth, .. },
         ..

@@ -3,10 +3,10 @@ use diesel::SelectableHelper;
 use diesel::prelude::*;
 use diesel::upsert::excluded;
 use models::db::auth::privilege::Privilege;
-use schemas::auth::privileges;
+use schemas::app::auth::privileges;
 
 use diesel_async::RunQueryDsl;
-use schemas::auth::roles_privileges;
+use schemas::app::auth::roles_privileges;
 use tracing::trace;
 
 use crate::repositories::RepositoryResult;

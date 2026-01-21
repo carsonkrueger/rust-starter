@@ -1,12 +1,13 @@
 use chrono::NaiveDateTime;
 use datastar::templates::table::IntoTableData;
 use diesel::prelude::*;
+use schemas::app;
 use serde::Serialize;
 use templates::table::{TdProps, ThProps, td, th};
 use templr::{templ, templ_ret};
 
 #[derive(Queryable, Selectable, Insertable, Clone, Debug, Serialize)]
-#[diesel(table_name = schemas::auth::users)]
+#[diesel(table_name = app::auth::users)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct User {
     #[diesel(skip_update)]

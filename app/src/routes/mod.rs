@@ -1,7 +1,7 @@
 use core::fmt;
 
 use crate::{
-    middlewares::trace::trace_middleware,
+    middlewares::trace::ctx_middleware,
     routes::{
         private::management::ManagementRoute,
         public::{login::LoginRoute, sign_up::SignUpRoute},
@@ -126,7 +126,7 @@ pub fn build_router(app_state: AppState) -> Router {
         // === Public Routes End ===
         .layer(middleware::from_fn_with_state(
             app_state.clone(),
-            trace_middleware,
+            ctx_middleware,
         ))
         .layer(trace_layer)
         .with_state(app_state)

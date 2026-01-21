@@ -6,9 +6,9 @@ use models::db::auth::role::Role;
 
 use diesel_async::RunQueryDsl;
 use models::db::auth::role_privilege::RolePrivilegeJoin;
-use schemas::auth::privileges;
-use schemas::auth::roles;
-use schemas::auth::roles_privileges;
+use schemas::app::auth::privileges;
+use schemas::app::auth::roles;
+use schemas::app::auth::roles_privileges;
 use tracing::trace;
 
 use crate::repositories::RepositoryResult;
