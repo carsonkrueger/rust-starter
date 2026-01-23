@@ -8,8 +8,8 @@ set -xe
 # Run from the root directory of the project
 # You should run deploy.sh after this.
 
-USER=john_doe # FIX ME
-IP=192.168.1.1 # FIX ME
+USER=name # FIX ME
+IP=1.2.3.4 # FIX ME
 
 ENV=$1
 BIN=$2
@@ -34,3 +34,4 @@ ssh "$USER@$IP" "docker load -i ~/${ENV}/${ENV}_${BIN}.tar"
 
 # Cleanup
 rm "${ENV}_${BIN}.tar"
+cd -

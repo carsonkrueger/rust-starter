@@ -19,12 +19,13 @@ services:
         container_name: nginx-proxy-acme
         restart: always
         environment:
-            DEFAULT_EMAIL: example@email.com
-        volumes_from:
+            DEFAULT_EMAIL: ${DEFAULT_EMAIL}
+            NGINX_PROXY_CONTAINER: nginx-proxy
+        volumes:
             - nginx_certs:/etc/nginx/certs
             - nginx_vhost:/etc/nginx/vhost.d
             - nginx_html:/usr/share/nginx/html
-            - /var/run/docker.sock:/tmp/docker.sock:ro
+            - /var/run/docker.sock:/var/run/docker.sock:ro
             - acme:/etc/acme.sh
         networks:
             - proxy
@@ -36,8 +37,6 @@ services:
             POSTGRES_USER: ${DB_USER}
             POSTGRES_PASSWORD: ${DB_PASSWORD}
             POSTGRES_DB: ${DB_NAME}
-        ports:
-            - "5432"
         volumes:
             - pgdata_app:/var/lib/postgresql/18/docker
         healthcheck:
@@ -46,6 +45,8 @@ services:
             retries: 3
         env_file:
             - .env
+        networks:
+            - backend
 
     app:
         image: prod_app:latest
@@ -57,18 +58,19 @@ services:
             context: ../../
             dockerfile: app/Dockerfile
         environment:
-            - VIRTUAL_HOST=example.com
-            - LETSENCRYPT_HOST=example.com
+            - VIRTUAL_HOST=${DOMAIN}
+            - LETSENCRYPT_HOST=${DOMAIN}
         expose:
             - "${PORT}"
         env_file:
             - .env
         networks:
             - proxy
+            - backend
 
 networks:
     proxy:
-        driver: bridge
+    backend:
 
 volumes:
     nginx_certs:

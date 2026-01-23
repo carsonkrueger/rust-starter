@@ -15,4 +15,4 @@ if [ "$ENV" != "beta" ] && [ "$ENV" != "prod" ]; then
 fi
 
 # Build All images (we only have one binary right now)
-./DEVOPS/build_app.sh $ENV app
+./DEVOPS/build_one.sh $ENV app
