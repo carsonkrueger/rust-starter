@@ -8,7 +8,7 @@ pub fn page<'a>() -> templ_ret!['a] {
         #page_layout() {
             <div class="px-8 min-h-screen text-main">
                 <div class="flex flex-col justify-center gap-8 pt-[22%]">
-                    <p class="text-6xl">The ultimate kit <br/> for <b class="font-black">your next <br/> passion project.</b></p>
+                    <p class="text-7xl font-thin">The ultimate kit <br/> for <b class="font-black">your next <br/> passion project.</b></p>
                     <a
                         href="https://github.com/carsonkrueger/rust-starter"
                         target="_blank"

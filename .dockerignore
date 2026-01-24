@@ -10,7 +10,10 @@
 !app/public/
 !app/diesel.toml
 !app/migrations
+!app/app.css
+!app/package*.json
 
 !libs
 
+app/public/css/index.css
 **/target/
