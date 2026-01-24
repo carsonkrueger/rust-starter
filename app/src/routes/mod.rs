@@ -39,6 +39,8 @@ pub type RouteResult<T> = std::result::Result<T, Error>;
 #[allow(unused)]
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
+    #[error("{0}")]
+    GenericError(StatusCode, String),
     #[error(transparent)]
     Service(#[from] services::Error),
     #[error(transparent)]
@@ -58,6 +60,15 @@ pub enum Error {
 impl IntoResponse for Error {
     fn into_response(self) -> axum::response::Response {
         match self {
+            Error::GenericError(status_code, message) => {
+                if status_code.is_client_error() {
+                    warn!(error = %message, "generic error");
+                    (status_code, message).into_response()
+                } else {
+                    error!(error = %message, "generic error");
+                    (status_code, "internal server error").into_response()
+                }
+            }
             Error::Service(e) => {
                 error!(error = %e, "service error");
                 e.into_response()

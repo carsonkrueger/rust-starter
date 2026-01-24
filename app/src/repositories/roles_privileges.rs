@@ -1,9 +1,18 @@
 use crate::repositories::DbConn;
-use diesel::{BoolExpressionMethods, ExpressionMethods, SelectableHelper};
-use models::db::auth::role_privilege::RolePrivilege;
+use diesel::{
+    BoolExpressionMethods, ExpressionMethods, QueryDsl, SelectableHelper, TextExpressionMethods,
+};
+use models::{
+    api::search_params::SearchParams,
+    db::auth::{
+        privilege::Privilege,
+        role::Role,
+        role_privilege::{RolePrivilege, RolePrivilegeJoin},
+    },
+};
 
 use diesel_async::RunQueryDsl;
-use schemas::app::auth::roles_privileges;
+use schemas::app::auth::{privileges, roles, roles_privileges};
 use tracing::trace;
 
 use crate::repositories::RepositoryResult;
@@ -22,6 +31,17 @@ pub trait RolesPrivilegesRepository {
         role_id: i16,
         privilege_id: i64,
     ) -> RepositoryResult<Option<RolePrivilege>>;
+    async fn join_list(
+        &self,
+        db: &mut DbConn,
+        params: &SearchParams,
+    ) -> RepositoryResult<Vec<RolePrivilegeJoin>>;
+    async fn join_one(
+        &self,
+        db: &mut DbConn,
+        role_id: i16,
+        privilege_id: i64,
+    ) -> RepositoryResult<Option<RolePrivilegeJoin>>;
 }
 
 #[derive(Debug)]
@@ -66,5 +86,53 @@ impl RolesPrivilegesRepository for RolesPrivileges {
             return Ok(None);
         }
         Ok(Some(res?))
+    }
+    async fn join_list(
+        &self,
+        db: &mut DbConn,
+        params: &SearchParams,
+    ) -> RepositoryResult<Vec<RolePrivilegeJoin>> {
+        trace!("->> join_list");
+        let mut sql = roles_privileges::table
+            .inner_join(privileges::table)
+            .inner_join(roles::table)
+            .select((Role::as_select(), Privilege::as_select()))
+            .into_boxed();
+        if let Some(query) = &params.query {
+            let query = format!("%{}%", query);
+            sql = sql.filter(
+                roles::name
+                    .like(query.clone())
+                    .or(privileges::name.like(query)),
+            );
+        }
+        let joins = sql.load::<(Role, Privilege)>(db).await?;
+        Ok(joins.into_iter().map(|t| t.into()).collect())
+    }
+    async fn join_one(
+        &self,
+        db: &mut DbConn,
+        role_id: i16,
+        privilege_id: i64,
+    ) -> RepositoryResult<Option<RolePrivilegeJoin>> {
+        trace!("->> join_one");
+        let join = roles_privileges::table
+            .inner_join(privileges::table)
+            .inner_join(roles::table)
+            .select((Role::as_select(), Privilege::as_select()))
+            .filter(
+                roles_privileges::role_id
+                    .eq(role_id)
+                    .and(roles_privileges::privilege_id.eq(privilege_id)),
+            )
+            .first::<(Role, Privilege)>(db)
+            .await;
+        // handle if none is found
+        let res = match join {
+            Ok(r) => Some(r.into()),
+            Err(diesel::result::Error::NotFound) => None,
+            e => Some(e?.into()),
+        };
+        Ok(res)
     }
 }

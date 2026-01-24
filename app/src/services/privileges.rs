@@ -1,7 +1,11 @@
 use std::sync::Arc;
 
+use chrono::Utc;
 use diesel_async::{AsyncConnection, scoped_futures::ScopedFutureExt};
-use models::db::auth::role_privilege::{RolePrivilege, RolePrivilegeJoin};
+use models::{
+    api::search_params::SearchParams,
+    db::auth::role_privilege::{RolePrivilege, RolePrivilegeJoin},
+};
 use tracing::trace;
 // use utils::auth::privileges::Privilege;
 
@@ -15,17 +19,34 @@ use crate::{
 
 pub trait PrivilegesService {
     fn new(pool: DBPool, repos: Arc<RepositoryManager>) -> Self;
-    async fn associate(
+    async fn create_role_privilege(&self, role_id: i16, privilege_id: i64) -> ServiceResult<()>;
+    async fn associate_auth(
         &self,
         role_id: i16,
         privileges: &[utils::auth::privileges::Privilege],
     ) -> ServiceResult<Vec<RolePrivilege>>;
-    async fn list_roles_privileges(&self) -> ServiceResult<Vec<RolePrivilegeJoin>>;
-    async fn disassociate(
+    async fn list_roles_privileges<SP: Into<SearchParams>>(
+        &self,
+        search_params: SP,
+    ) -> ServiceResult<Vec<RolePrivilegeJoin>>;
+    async fn one_role_privilege(
+        &self,
+        role_id: i16,
+        privilege_id: i64,
+    ) -> ServiceResult<Option<RolePrivilegeJoin>>;
+    async fn disassociate_auth(
         &self,
         role_id: i16,
         privilege_id: i64,
     ) -> ServiceResult<Option<RolePrivilege>>;
+    async fn privileges(
+        &self,
+        params: &SearchParams,
+    ) -> ServiceResult<Vec<models::db::auth::privilege::Privilege>>;
+    async fn roles(
+        &self,
+        params: &SearchParams,
+    ) -> ServiceResult<Vec<models::db::auth::role::Role>>;
 }
 
 #[derive(Debug, Clone)]
@@ -38,7 +59,27 @@ impl PrivilegesService for Privileges {
     fn new(pool: DBPool, repos: Arc<RepositoryManager>) -> Self {
         Self { pool, repos }
     }
-    async fn associate(
+    async fn create_role_privilege(&self, role_id: i16, privilege_id: i64) -> ServiceResult<()> {
+        trace!("->> create_role_privilege");
+
+        let utc = Utc::now();
+        let now = utc.naive_utc();
+
+        let role_privilege = RolePrivilege {
+            role_id,
+            privilege_id,
+            created_at: Some(now),
+        };
+
+        let mut db = self.pool.get().await?;
+        self.repos
+            .roles_privileges
+            .add_many(&mut db, &[role_privilege])
+            .await?;
+
+        Ok(())
+    }
+    async fn associate_auth(
         &self,
         role_id: i16,
         privileges: &[utils::auth::privileges::Privilege],
@@ -88,12 +129,19 @@ impl PrivilegesService for Privileges {
 
         Ok(role_privileges)
     }
-    async fn list_roles_privileges(&self) -> ServiceResult<Vec<RolePrivilegeJoin>> {
+    async fn list_roles_privileges<SP: Into<SearchParams>>(
+        &self,
+        search_params: SP,
+    ) -> ServiceResult<Vec<RolePrivilegeJoin>> {
         let mut db = self.pool.get().await?;
-        let roles_privileges = self.repos.roles.join_list(&mut db).await?;
+        let roles_privileges = self
+            .repos
+            .roles_privileges
+            .join_list(&mut db, &search_params.into())
+            .await?;
         Ok(roles_privileges)
     }
-    async fn disassociate(
+    async fn disassociate_auth(
         &self,
         role_id: i16,
         privilege_id: i64,
@@ -103,6 +151,35 @@ impl PrivilegesService for Privileges {
             .repos
             .roles_privileges
             .delete(&mut db, role_id, privilege_id)
+            .await?;
+        Ok(row)
+    }
+    async fn privileges(
+        &self,
+        params: &SearchParams,
+    ) -> ServiceResult<Vec<models::db::auth::privilege::Privilege>> {
+        let mut db = self.pool.get().await?;
+        let privileges = self.repos.privileges.index(&mut db, params).await?;
+        Ok(privileges)
+    }
+    async fn roles(
+        &self,
+        params: &SearchParams,
+    ) -> ServiceResult<Vec<models::db::auth::role::Role>> {
+        let mut db = self.pool.get().await?;
+        let roles = self.repos.roles.index(&mut db, params).await?;
+        Ok(roles)
+    }
+    async fn one_role_privilege(
+        &self,
+        role_id: i16,
+        privilege_id: i64,
+    ) -> ServiceResult<Option<RolePrivilegeJoin>> {
+        let mut db = self.pool.get().await?;
+        let row = self
+            .repos
+            .roles_privileges
+            .join_one(&mut db, role_id, privilege_id)
             .await?;
         Ok(row)
     }

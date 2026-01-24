@@ -59,7 +59,7 @@ async fn main() {
     // Associate all privileges to the admin role
     let temp_priv_service = Privileges::new(pool, Arc::new(RepositoryManager::default()));
     let privs: Vec<Privilege> = Privilege::iter().collect();
-    if let Err(e) = temp_priv_service.associate(ROLE_ADMIN, &privs).await {
+    if let Err(e) = temp_priv_service.associate_auth(ROLE_ADMIN, &privs).await {
         error!("Failed to associate admin privileges: {}", e);
         panic!("Failed to associate admin privileges: {}", e);
     }

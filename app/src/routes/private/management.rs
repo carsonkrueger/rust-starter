@@ -1,15 +1,23 @@
 use axum::{
-    Router,
+    Form, Router,
     extract::{Path, Query, State},
+    http::StatusCode,
     middleware::from_fn_with_state,
     response::IntoResponse,
-    routing::{delete, get},
+    routing::{delete, get, post},
 };
 use datastar::{
     modes::DatastarMode,
-    templates::table::{IntoTableData, search_params::DatastarSearchParams, table_patch_stream},
+    templates::table::{
+        DatastarRowsProps, IntoTableData, search_params::DatastarSearchParams, table_patch_stream,
+    },
 };
-use models::db::auth::{role::Role, role_privilege::RolePrivilegeJoin};
+use models::{
+    api::search_params::SearchParams,
+    db::auth::{role::Role, role_privilege::RolePrivilegeJoin},
+};
+use serde::Deserialize;
+use templr::Template;
 use tracing::trace;
 use utils::auth::privileges::Privilege;
 
@@ -21,7 +29,7 @@ use crate::{
     },
     context::AppState,
     middlewares::privileges::privileges_middleware,
-    routes::{NestedRouter, NestedRouterPath, RouteResult},
+    routes::{Error, NestedRouter, NestedRouterPath, RouteResult},
     services::{ServiceManager, privileges::PrivilegesService, users::UsersService},
 };
 
@@ -73,6 +81,13 @@ impl NestedRouter<AppState> for ManagementRoute {
                     privileges_middleware,
                 )),
             )
+            .route(
+                "/roles/privileges",
+                post(create_role_privilege).route_layer(from_fn_with_state(
+                    vec![Privilege::RolesPrivilegeCreate],
+                    privileges_middleware,
+                )),
+            )
     }
 }
 // /roles/{}/privilege/{}
@@ -98,9 +113,23 @@ async fn users_rows(
     Ok(stream)
 }
 
-async fn roles_privileges_page() -> RouteResult<impl IntoResponse> {
+async fn roles_privileges_page(
+    State(AppState {
+        svc: ServiceManager { privileges, .. },
+        ..
+    }): State<AppState>,
+) -> RouteResult<impl IntoResponse> {
     trace!("->> roles_privileges_page");
-    let page = management_roles_privileges::page();
+
+    let params = SearchParams {
+        limit: 9999,
+        page: 1,
+        query: None,
+    };
+    let roles = privileges.roles(&params).await?;
+    let privileges = privileges.privileges(&params).await?;
+
+    let page = management_roles_privileges::page(&roles, &privileges);
     Ok(render(Box::new(page), Layout::Management))
 }
 
@@ -114,7 +143,9 @@ async fn roles_privileges_rows(
     }): Query<DatastarSearchParams>,
 ) -> RouteResult<impl IntoResponse> {
     trace!("->> roles_privileges_rows");
-    let roles = privileges.list_roles_privileges().await?;
+    let roles = privileges
+        .list_roles_privileges(search_params.clone())
+        .await?;
     let stream = table_patch_stream(&roles, search_params)?;
     Ok(stream)
 }
@@ -127,7 +158,7 @@ async fn delete_role_privilege(
     Path((role_id, privilege_id)): Path<(i16, i64)>,
 ) -> RouteResult<impl IntoResponse> {
     trace!("->> delete_role_privilege");
-    let deleted = privileges.disassociate(role_id, privilege_id).await?;
+    let deleted = privileges.disassociate_auth(role_id, privilege_id).await?;
     if let Some(row) = deleted {
         // Need to use this join model to get the row_id() method to remove the element
         let join = RolePrivilegeJoin(
@@ -152,4 +183,48 @@ async fn delete_role_privilege(
     } else {
         Ok(datastar::patch_elements().axum_stream())
     }
+}
+
+#[derive(Deserialize)]
+struct RolePrivilegeCreate {
+    role_id: i16,
+    privilege_id: i64,
+}
+
+async fn create_role_privilege(
+    State(AppState {
+        svc: ServiceManager { privileges, .. },
+        ..
+    }): State<AppState>,
+    Form(role_privilege_create): Form<RolePrivilegeCreate>,
+) -> RouteResult<impl IntoResponse> {
+    trace!("->> create_role_privilege");
+
+    privileges
+        .create_role_privilege(
+            role_privilege_create.role_id,
+            role_privilege_create.privilege_id,
+        )
+        .await?;
+    let join = privileges
+        .one_role_privilege(
+            role_privilege_create.role_id,
+            role_privilege_create.privilege_id,
+        )
+        .await?
+        .ok_or(Error::GenericError(
+            StatusCode::INTERNAL_SERVER_ERROR,
+            "Failed to fetch role privilege".to_string(),
+        ))?;
+
+    let rows = &[join];
+    let row_template =
+        datastar::templates::table::datastar_rows(DatastarRowsProps { rows }).render(&())?;
+    let sse = datastar::patch_elements()
+        .selector(format!("#{}", RolePrivilegeJoin::TABLE_BODY_ID))
+        .mode(DatastarMode::Prepend)
+        .elements(row_template)
+        .axum_stream();
+
+    Ok(sse)
 }

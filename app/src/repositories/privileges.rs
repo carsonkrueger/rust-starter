@@ -2,6 +2,7 @@ use crate::repositories::DbConn;
 use diesel::SelectableHelper;
 use diesel::prelude::*;
 use diesel::upsert::excluded;
+use models::api::search_params::SearchParams;
 use models::db::auth::privilege::Privilege;
 use schemas::app::auth::privileges;
 
@@ -14,6 +15,7 @@ use crate::repositories::RepositoryResult;
 #[allow(unused)]
 pub trait PrivilegesRepository {
     fn new() -> Self;
+    async fn index(&self, db: &mut DbConn, sp: &SearchParams) -> RepositoryResult<Vec<Privilege>>;
     async fn add_many(
         &self,
         db: &mut DbConn,
@@ -28,6 +30,23 @@ pub struct Privileges;
 impl PrivilegesRepository for Privileges {
     fn new() -> Self {
         Self {}
+    }
+    async fn index(
+        &self,
+        db: &mut DbConn,
+        params: &SearchParams,
+    ) -> RepositoryResult<Vec<Privilege>> {
+        trace!("->> index");
+        let mut query = privileges::table
+            .offset(params.offset())
+            .limit(params.limit as i64)
+            .into_boxed();
+        if let Some(q) = &params.query
+            && !q.is_empty()
+        {
+            query = query.filter(privileges::name.ilike(format!("%{}%", q)));
+        }
+        Ok(query.load(db).await?)
     }
     async fn add_many(
         &self,

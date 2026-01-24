@@ -135,6 +135,7 @@ pub fn table_patch_events<'a, TD: IntoTableData, S: Into<TableSearchParams>>(
     let row_templates = datastar_rows(DatastarRowsProps { rows }).render(&())?;
     let mut search_params = search_params.into();
     let mode = match search_params.page {
+        0 => DatastarMode::Prepend,
         1 => DatastarMode::Inner,
         _ => DatastarMode::Append,
     };
