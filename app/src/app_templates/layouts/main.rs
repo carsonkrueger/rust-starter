@@ -9,9 +9,7 @@ pub fn main<'a>() -> templ_ret!['a] {
         #use children;
         <div class="dark:bg-[url(/public/img/wave_background_dark.svg)] bg-[url(/public/img/wave_background.svg)] bg-no-repeat bg-cover bg-center bg-fixed">
             <header class="flex flex-col justify-between items-center backdrop-blur-xs hover:backdrop-blur-lg fixed lg:p-4 p-6 top-0 z-10 w-30 h-screen drop-shadow-lg hover:drop-shadow-2xl animate-all duration-300">
-                <h1 class="text-lg text-primary-foreground">
-                    Rust Starter Kit
-                </h1>
+                <img src="/public/img/rust.svg" />
                 <div class="flex flex-col items-center justify-end gap-1">
                     <a href="/home">
                         #button(ButtonProps{

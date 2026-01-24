@@ -6,9 +6,6 @@ use crate::icon::icon_data::Icon;
 
 pub mod icon_data;
 
-// static CACHED_ICONS: Lazy<RwLock<HashMap<String, String>>> =
-//     Lazy::new(|| RwLock::new(HashMap::new()));
-
 #[derive(Debug, Clone)]
 pub struct IconProps<'a> {
     pub icon: Icon,
@@ -36,28 +33,8 @@ impl Default for IconProps<'_> {
 
 /// Returns a function that produces a Template for an icon name
 pub fn icon<'a>(props: IconProps<'a>) -> templ_ret!['a] {
-    // let name = props.icon as u8;
-    // let cache_key = format!(
-    //     "{name}|s:{:?}|c:{:?}|f:{:?}|sk:{:?}|sw:{:?}|cl:{:?}",
-    //     props.size, props.color, props.fill, props.stroke, props.stroke_width, props.class
-    // );
-
     FnTemplate::new(move |w, _ctx, _| {
-        // Fast path: read lock
-        // if let Some(svg) = CACHED_ICONS.read().unwrap().get(&cache_key) {
-        //     w.write_str(svg)?;
-        //     return Ok(());
-        // }
-
-        // Generate SVG
         let svg = generate_svg(&props)?;
-
-        // Cache result
-        // CACHED_ICONS
-        //     .write()
-        //     .unwrap()
-        //     .insert(cache_key.clone(), svg.clone());
-
         w.write_str(&svg)?;
         Ok(())
     })
