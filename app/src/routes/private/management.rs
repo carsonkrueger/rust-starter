@@ -12,10 +12,7 @@ use datastar::{
         DatastarRowsProps, IntoTableData, search_params::DatastarSearchParams, table_patch_stream,
     },
 };
-use models::{
-    api::search_params::SearchParams,
-    db::auth::{role::Role, role_privilege::RolePrivilegeJoin},
-};
+use models::{api::search_params::SearchParams, db::auth::role_privilege::RolePrivilegeJoin};
 use serde::Deserialize;
 use templr::Template;
 use tracing::trace;
@@ -158,31 +155,27 @@ async fn delete_role_privilege(
     Path((role_id, privilege_id)): Path<(i16, i64)>,
 ) -> RouteResult<impl IntoResponse> {
     trace!("->> delete_role_privilege");
-    let deleted = privileges.disassociate_auth(role_id, privilege_id).await?;
-    if let Some(row) = deleted {
-        // Need to use this join model to get the row_id() method to remove the element
-        let join = RolePrivilegeJoin(
-            Role {
-                id: row.role_id,
-                name: "".into(),
-                created_at: None,
-                updated_at: None,
-            },
-            models::db::auth::privilege::Privilege {
-                id: row.privilege_id,
-                name: "".into(),
-                created_at: None,
-                updated_at: None,
-            },
-        );
-        let selector = format!("#{}", join.row_id());
-        Ok(datastar::patch_elements()
-            .mode(DatastarMode::Remove)
-            .selector(selector)
-            .axum_stream())
-    } else {
-        Ok(datastar::patch_elements().axum_stream())
-    }
+
+    let join = privileges
+        .one_role_privilege(role_id, privilege_id)
+        .await?
+        .ok_or(Error::GenericError(
+            StatusCode::NOT_FOUND,
+            "Role privilege not found".to_string(),
+        ))?;
+    privileges
+        .disassociate_auth(role_id, privilege_id)
+        .await?
+        .ok_or(Error::GenericError(
+            StatusCode::NOT_FOUND,
+            "Role privilege not found".to_string(),
+        ))?;
+
+    let selector = format!("#{}", join.row_id());
+    Ok(datastar::patch_elements()
+        .mode(DatastarMode::Remove)
+        .selector(selector)
+        .axum_stream())
 }
 
 #[derive(Deserialize)]
